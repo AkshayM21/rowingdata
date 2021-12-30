@@ -59,9 +59,6 @@ def parse(params):
             },index=[0]
         )
         output_df.to_csv(params["output_path"])
-    elif(params["path"] == 'CSVs/SorS.csv'):
-        output_df = df[df['Name'] == params["name"]]
-        output_df.to_csv(params["output_path"])
     else:
         output_df = pd.DataFrame(
             {
@@ -112,7 +109,6 @@ def find_valid_ranges(df, on_time, break_time):
 
 params = {
     "path": "CSVs/Step Test Sample.csv",
-    "name": "Gil Dexter",
     "on_time": 240,
     "break_time": 60,
     "decoupling": False,
