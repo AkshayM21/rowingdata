@@ -59,7 +59,7 @@ def parse(params):
             },index=[0]
         )
         output_df.to_csv(params["output_path"])
-    else if(params["path"] == 'SorS.csv'):
+    elif(params["path"] == 'CSVs/SorS.csv'):
         output_df = df[df['Name'] == params["name"]]
         output_df.to_csv(params["output_path"])
     else:
