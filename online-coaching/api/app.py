@@ -28,7 +28,7 @@ with app.app_context():
 
 
 # saves pandas dataframe to the given output_path in firebase storage
-# todo - test with website; commit
+# NB: gsutil command for copying a saved stats sheet to computer --  gsutil cp gs://REDACTED_PROJECT_ID.appspot.com/rower_stats/test.csv Documents/GitHub/rowingdata/online-coaching/api/output/test.csv
 def save_to_cloud(df, file_name):
   storage.bucket(app=firebase).blob("rower_stats/"+file_name).upload_from_string(df.to_csv(), "text/csv")
 
