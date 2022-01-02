@@ -56,12 +56,14 @@ def submit():
     params['name'] = request.form['name']
     with open('/CSVs/params.json', 'w') as output:
         json.dump(params, output)
+    return redirect(url_for('index'))
 
 def uploadFiles():
     file = request.files['file']
     path='/CSVs'
     file_path = os.path.join(path, file.filename)
     open(file_path, 'w').write(file.read())
+    return redirect(url_for('index'))
 
 
 if __name__ == '__main__':
