@@ -3,13 +3,12 @@ import pandas as pd
 # todo: currently, the parse method makes a new csv for each workout -- change to editing 1 csv for each player (by id)
 # note - returns output csv as a pandas dataframe
 # params is a dictionary containing parameters relevant for parsing
-# eg, "path" refers to the path of the csv we're parsing; "decoupling" is a boolean indicating if decoupling workout
+# eg, "decoupling" is a boolean indicating if the workout is a decoupling workout or not
 # "on_time" indicates in seconds the lengths of reps (ie, that aren't on break)
-# "break_time" indicates in seconds the lengths of the break; "id" indicates the ID/name of the rower
-# "output_path" refers to the path where the output csv is saved (or edited)
-def parse(params):
-    df = pd.read_csv(params["path"])
-        
+# "break_time" indicates in seconds the lengths of the break; "name" indicates the ID/name of the rower
+def parse(df, params):
+    #df = pd.read_csv(params["path"])
+    
 
     ranges = find_valid_ranges(df, params["on_time"], params["break_time"])
 
@@ -114,7 +113,7 @@ def find_valid_ranges(df, on_time, break_time):
 #     "path": "CSVs/Step Test Sample.csv",
 #     "on_time": 240,
 #     "break_time": 60,
-#     "decoupling": False,
+#     "decoupling": "False",
 #     "output_path": "output/Step Test Sample stats.csv"
 # }
 # parse(params)
