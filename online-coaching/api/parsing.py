@@ -1,6 +1,7 @@
 import pandas as pd
 
 # todo: currently, the parse method makes a new csv for each workout -- change to editing 1 csv for each player (by id)
+# note - returns output csv as a pandas dataframe
 # params is a dictionary containing parameters relevant for parsing
 # eg, "path" refers to the path of the csv we're parsing; "decoupling" is a boolean indicating if decoupling workout
 # "on_time" indicates in seconds the lengths of reps (ie, that aren't on break)
@@ -58,7 +59,8 @@ def parse(params):
                 "decoupling_rate":decoupling_rate
             },index=[0]
         )
-        output_df.to_csv(params["output_path"])
+        #output_df.to_csv(params["output_path"])
+        return output_df
     else:
         output_df = pd.DataFrame(
             {
@@ -70,7 +72,8 @@ def parse(params):
                 "avg_500m_time":avg_500_split
             }, index=[0]
         )
-        output_df.to_csv(params["output_path"])
+        #output_df.to_csv(params["output_path"])
+        return output_df
 
 
 # returns a list of tuples of row ranges in the dataframe that are valid data
@@ -107,14 +110,14 @@ def find_valid_ranges(df, on_time, break_time):
 
     return range_list
 
-params = {
-    "path": "CSVs/Step Test Sample.csv",
-    "on_time": 240,
-    "break_time": 60,
-    "decoupling": False,
-    "output_path": "output/Step Test Sample stats.csv"
-}
-parse(params)
+# params = {
+#     "path": "CSVs/Step Test Sample.csv",
+#     "on_time": 240,
+#     "break_time": 60,
+#     "decoupling": False,
+#     "output_path": "output/Step Test Sample stats.csv"
+# }
+# parse(params)
 #find_valid_ranges(pd.read_csv("CSVs/3x19 2 for Johnny.csv"), 1140, 60)
 #find_valid_ranges(pd.read_csv("CSVs/40 minute test.csv"), 0)
 #find_valid_ranges(pd.read_csv("CSVs/HISE_Sample.csv"), 100, 20)
