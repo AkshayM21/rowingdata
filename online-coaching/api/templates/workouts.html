@@ -1,7 +1,12 @@
 {% extends layout.html %}
-{% extends profile_base.html %}
 {% block content %}
-    <form action="/" method="GET">
-        #GET Method for extracting from firebase
+    <h1>{{name}}</h1>
+    <div>
+        <a href="/workouts/"+{{uni}}>Workouts</a>
+        |
+        <a href="/sors/"+{{uni}}>SorS Results</a>
+    </div>
+    <form action="/workouts/"+{{uni}} method="GET">
+        <!--Need to embed csv into html-->
     </form>
 {% endblock %}
