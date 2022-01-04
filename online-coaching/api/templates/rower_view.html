@@ -1,30 +1,20 @@
 {% extends layout.html %}
 {% block content %}
     <h1>Submit Workout Information</h1>
-    <form action="/" method="POST">
-        <p>
-          <label for="date">Date:</label>
-          <input type="text" name="date"/>
-        </p>
-        <p>
-          <label for="workout_type">Workout:</label>
-          <input type="text" name="workout_type"/>
-        </p>
-        <p>
-          <label for="time_on">Piece Time:</label>
-          <input type="text" name="time_on"/>
-        </p>
-        <p>
-          <label for="id">UNI:</label>
-          <input type="text" name="id"/>
-        </p>
-        #Scale of 1 to 20 RPE
-        <p>
-          <label for="rpe">RPE:</label>
-          <input type="text" name="rpe"/>
-        </p>
-        #submit button
-        #should redirect to home page
-        <p><input type="submit" name=""/></p>
+    <form action="/rower_view" method="POST">
+        {{ template_form.hidden_tag() }}
+        <p>{{ template_form.id.label }}</p>
+        {{ template_form.id()}}
+        <p>{{ template_form.date.label }}</p>
+        {{ template_form.date()}}
+        <p>{{ template_form.workout_type.label }}</p>
+        {{ template_form.workout_type() }}
+        {{ template_form.decoupling() }}
+        <p>{{ template_form.decoupling.label }}</p>
+        <p>{{ template_form.time_on.label }}</p>
+        {{ template_form.time_on() }}
+        <p>{{ template_form.rpe.label }}</p>
+        {{ template_form.rpe() }}
+        {{ template_form.submit() }}
     </form>
 {% endblock content %}
