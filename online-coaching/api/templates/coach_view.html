@@ -1,7 +1,7 @@
 {% extends layout.html %}
 {% block content %}
     <h1>Rowers</h1>
-    {% for name in rowers_list %}
-        <p><a href='/profile'>name</a></p>
+    {% for uni,name  in {{ rowers_dictionary.items() }} %}
+        <p><a href='/workouts/'+uni>{{ name }}</a></p>
     {% endfor %}
 {% endblock content %}
