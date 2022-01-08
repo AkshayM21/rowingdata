@@ -1,20 +1,5 @@
 {% extends layout.html %}
 {% block content %}
-    <h1>Submit Workout Information</h1>
-    <form action="/rower_view" method="POST">
-        {{ template_form.hidden_tag() }}
-        <p>{{ template_form.id.label }}</p>
-        {{ template_form.id()}}
-        <p>{{ template_form.date.label }}</p>
-        {{ template_form.date()}}
-        <p>{{ template_form.workout_type.label }}</p>
-        {{ template_form.workout_type() }}
-        {{ template_form.decoupling() }}
-        <p>{{ template_form.decoupling.label }}</p>
-        <p>{{ template_form.time_on.label }}</p>
-        {{ template_form.time_on() }}
-        <p>{{ template_form.rpe.label }}</p>
-        {{ template_form.rpe() }}
-        {{ template_form.submit() }}
-    </form>
+    <main id="rower_view"></main>
+    <script src="/rower_view.compiled.js"></script>
 {% endblock content %}
