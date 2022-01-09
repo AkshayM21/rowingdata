@@ -25,6 +25,11 @@ with app.app_context():
   APP_ROOT = os.path.dirname(os.path.abspath(__file__))
   cred = credentials.Certificate(json.load(current_app.open_resource("REDACTED_PROJECT_ID-firebase-adminsdk-yccz8-dabed493e7.json")))
   firebase = initialize_app(cred, options=firebaseConfig)
+  rowers_df = pd.read_csv(current_app.open_resource("CSVs/rowers.csv"))
+  coxswains_df = pd.read_csv(current_app.open_resource("CSVs/coxswains.csv"))
+  testers_df = pd.read_csv(current_app.open_resource("CSVs/testers.csv"))
+  admin_df = pd.read_csv(current_app.open_resource("CSVs/admin.csv"))
+
 
 
 # saves pandas dataframe to the given output_path in firebase storage
@@ -33,9 +38,44 @@ def save_to_cloud(df, file_name):
   storage.bucket(app=firebase).blob("rower_stats/"+file_name).upload_from_string(df.to_csv(), "text/csv")
 
 
-@app.route('/', methods=['GET'])
-def hello_world():  # put application's code here
-  return render_template("index.html")
+def isRower(email):
+  email_list = rowers_df['Email']
+  return not email_list[email_list.isin([email])].empty
+
+def isCoxswain(email):
+  email_list = coxswains_df['Email']
+  return not email_list[email_list.isin([email])].empty
+
+def isTester(email):
+  email_list = testers_df['Email']
+  return not email_list[email_list.isin([email])].empty
+
+def isAdmin(email):
+  email_list = admin_df['Email']
+  return not email_list[email_list.isin([email])].empty
+
+
+@app.route('/api', methods=['GET'])
+def index(): 
+  return {
+    "name": "Hello World"
+  }
+
+@app.route('/auth', methods=['GET'])
+def is_auth_user():
+  email = request.args.get("email")
+  admin = isAdmin(email)
+  if(admin or isRower(email) or isCoxswain(email) or isTester(email)):
+    isStudent = not admin
+    return {
+      "isValid": "True",
+      "isStudent": str(isStudent) 
+    }
+  else:
+    return {
+      "isValid": "False"
+    }
+
 
 #page that covers rower's data
 #need to keep track of all parameters we will need

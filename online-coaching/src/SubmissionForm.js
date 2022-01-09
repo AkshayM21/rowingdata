@@ -1,8 +1,9 @@
-import React from 'react'
-import ReactDOM from 'react-dom'
-import {Base} from './index.js'
+import React, {Component} from "react"
 
-class Rower extends React.Component {
+import {logOut} from "./services/firebase"
+
+class SubmissionForm extends Component{
+
     constructor(props) {
         super(props);
         
@@ -16,10 +17,11 @@ class Rower extends React.Component {
             file:'N/A'
         };
         this.handleChange=this.handleChange.bind(this);
-        this.handleSelectChange = this.selectChange.bind(this);
+        this.handleSelectChange = this.handleSelectChange.bind(this);
     }
     handleSubmit(e) {
         e.preventDefault();
+        logOut();
     }
 
     handleChange(e) {
@@ -33,11 +35,9 @@ class Rower extends React.Component {
     handleSelectChange(e) {
         this.setState({workout_type: e.target.value});
     }
-    render() {
+
+    render (){
         return(
-            <div>
-                <Base/>
-                <h1>Submit Workout Information</h1>
                 <form onSubmit={this.handleSubmit} method="POST">
                     <label>
                         UNI:
@@ -73,10 +73,8 @@ class Rower extends React.Component {
                     </label>
                     <button type="submit">Submit</ button>
                 </form>
-            </div>
         )
     }
 }
 
-//Params are stored in compoment state, file can be obtained with id
-ReactDOM.render(<Rower />, document.getElementById('rower_view'))
+export default SubmissionForm

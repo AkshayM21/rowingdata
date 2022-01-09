@@ -29,4 +29,4 @@ class Workouts extends React.Component {
     }
 }
 
-ReactDOM.render(< />, document.getElementById('app'))
+//ReactDOM.render(< />, document.getElementById('app'))
