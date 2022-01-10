@@ -108,7 +108,6 @@ export default function Page(props) {
 
     return(
         <div>
-            <Base/>
             <Menu onChange={handleChange} />
             <h1>{name}</h1>
             <Tabs uni={this.state.uni} />
