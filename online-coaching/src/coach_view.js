@@ -1,12 +1,19 @@
 import React, { useState } from 'react'
-import ReactDOM from 'react-dom'
+
+import ListGroup from 'react-bootstrap/ListGroup'
+import {Tab} from '@mui/material'
+import { TabList, TabPanel } from "@mui/lab"
+
+
+
+
 
 // Menu passes uni and name up to Page
 class Menu extends React.Component {
     constructor(props) {
         super(props);
         // JSON of rower names, format {'jl6078': 'Jonathan Liu', 'uni2':'Name2'}
-        this.state={rowers={}};
+        this.state={rowers: {}};
     }
 
     handleChange(e) {
@@ -28,7 +35,7 @@ class Menu extends React.Component {
     }
 }
 
-export default function Card(props){
+export function Card(props){
     return(
         <div>
             <Card style={{ width: '18rem' }}>
@@ -45,41 +52,43 @@ export default function Card(props){
     )
 }
 
-export default function Deck(props) {
+export function Deck(props) {
     // Need GET method for json, use props.uni to call  
     const[workouts, setWorkouts]= useState({});
     
     return(
         <div>
-            {Object.values(workouts).map(obj => {
-                <Card workout={obj}/>})}
+            {Object.values(workouts).map(obj => (
+                <Card workout={obj}/> 
+            ))}
         </div>
     );   
 }
 
-export default function Workouts(props) {
+export function Workouts(props) {
     return(
         <Deck uni={this.props.uni} />
     )  
 }
 
 
-export default function SorS(props) {
+export function SorS(props) {
     const[results, setResults] = useState({});  
     // Array of JSON objects is named SorS- results={SorS: [Array of Rows]}
     // Need GET method for json, use props.uni to call   
     return (
-        {SorS.map((row,i) => (
-            <tr key={i}>
-                {Object.values(row).map((cell) => (
-                    <td>{cell}</td>
-                ))}
-            </tr>
-        ))}
+        // {SorS.map((row,i) => (
+        //     <tr key={i}>
+        //         {Object.values(row).map((cell) => (
+        //             <td>{cell}</td>
+        //         ))}
+        //     </tr>
+        // ))}
+        <div />
     );
 }
 
-export default function Tabs(props) {
+export function Tabs(props) {
     return (
         <Tabs>
             <TabList>
@@ -97,11 +106,11 @@ export default function Tabs(props) {
 
 }
 
-export default function Page(props) {
+export function Page(props) {
     const[uni, setUni] = useState('');
     const[name, setName] = useState('');
 
-    const handleChange= (newUni, newName) => {
+    const handleChange = (newUni, newName) => {
         setUni(newUni);
         setName(newName);
     }
@@ -115,4 +124,5 @@ export default function Page(props) {
     )
 }
 
-ReactDOM.render(<Page />, document.getElementById('coach_view'))
+export default Menu
+//ReactDOM.render(<Page />, document.getElementById('coach_view'))

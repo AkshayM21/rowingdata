@@ -1,6 +1,5 @@
 import React, {Component} from "react"
 
-import {logOut} from "./services/firebase"
 
 class SubmissionForm extends Component{
 
@@ -21,7 +20,6 @@ class SubmissionForm extends Component{
     }
     handleSubmit(e) {
         e.preventDefault();
-        logOut();
     }
 
     handleChange(e) {
