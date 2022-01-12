@@ -1,128 +1,156 @@
 import React, { useState } from 'react'
+import {Box, Drawer, Tab, TabContext, Drawer,Typography, Grid, Toolbar, Divider, MenuList, ListItemText}  from '@mui/material';
+import Card from '@mui/material/Card';
+//import CardActions from '@mui/material/CardActions';
 
-import ListGroup from 'react-bootstrap/ListGroup'
-import {Tab} from '@mui/material'
-import { TabList, TabPanel } from "@mui/lab"
-
-
-
-
-
-// Menu passes uni and name up to Page
-class Menu extends React.Component {
+const drawerWidth = 240;
+// RowerMenu passes uni up to Page
+class RowerMenu extends React.Component {
     constructor(props) {
         super(props);
         // JSON of rower names, format {'jl6078': 'Jonathan Liu', 'uni2':'Name2'}
-        this.state={rowers: {}};
+        this.state={rowers={}};
     }
 
     handleChange(e) {
-        const uni=e.target.value;
+        uni=e.target.value;
         this.props.onChange(uni, this.state.rowers[uni]);
     }
+
     render() {      
         return (
-          <div>
-            <select
-                value={this.state.value}
-                onChange={this.handleChange}>
-                {Object.keys(this.state.rowers).map(uni => {
-                    return <option value={uni}>{this.state.rowers[uni]}</option>
-                })}
-            </select>
-          </div>
+            <Box>
+                <Drawer
+                variant="permanent"
+                ModalProps={{
+                    keepMounted: true,
+                }}
+                sx={{
+                    display: { xs: 'block', sm: 'none' },
+                    '& .MuiDrawer-paper': { boxSizing: 'border-box', width: drawerWidth },
+                }}
+                >
+                    <Toolbar />
+                    <Divider />
+                    <MenuList>
+                        {Object.entries(this.state.rowers).map(([uni, name]) => (
+                            <MenuItem value={uni} onClick={() => { this.handleChange }}>
+                                <ListItemText primary={name} />
+                            </MenuItem>
+                        ))}
+                    </MenuList>
+                    <Divider />
+                </Drawer>
+            </Box>
         );
     }
 }
 
-export function Card(props){
-    return(
-        <div>
-            <Card style={{ width: '18rem' }}>
-                <ListGroup variant="flush">
-                    <ListGroup.Item>Date:{this.props.workout['date']} Workout:{this.props.workout['workout_description']}</ListGroup.Item>
-                    <ListGroup.Item>RPE:{this.props.workout['rpe']}</ListGroup.Item>
-                </ListGroup>
-            </Card>
-            {/*<Card.Body>
-                <Card.Link href="#">Training Stress Metrics</Card.Link>
-                <Card.Link href="#">Force Profile Analysis</Card.Link>
-            </Card.Body>*/}
-        </div>
+function Card(props){
+    // Workout json passed down from deck
+    return(        
+        <Card style={{ width: '16rem' }}>
+            <CardContent>
+                <Typography sx={{ fontSize: 14 }} color="text.secondary">
+                    {this.props.workout['date']}
+                </Typography>
+                <Typography>
+                    Workout:{this.props.workout['workout_description']}
+                </Typography>
+                <Typography sx={{ fontSize: 14 }}>
+                    RPE:{this.props.workout['rpe']}
+                </Typography>
+            </CardContent>
+            {/*<CardActions>
+                <Button size="small">Force Profile</Button>
+            </CardActions>*/}
+        </Card>    
     )
 }
 
-export function Deck(props) {
-    // Need GET method for json, use props.uni to call  
-    const[workouts, setWorkouts]= useState({});
+function Deck(props) {
+    // Need GET method for workouts json:{workouts:[{row1}, {row2}, etc], use props.uni to call
+    // Pass workouts array of json objects to workouts state
+    const[workouts, setWorkouts]= useState([]);
     
     return(
-        <div>
-            {Object.values(workouts).map(obj => (
-                <Card workout={obj}/> 
-            ))}
-        </div>
+        <Box>
+            <Grid container spacing={{ xs: 2, sm: 3 }} >
+                {Object.values(workouts).map((obj, index) => (
+                // Currently set for 2 cards per column in xs, 4 per column for sm
+                <Grid item xs={6} sm={3} key={index}>
+                    <Card workout={obj}/>
+                </Grid>))}
+            </Grid>              
+        </Box>
     );   
 }
 
-export function Workouts(props) {
+function Workouts(props) {
     return(
         <Deck uni={this.props.uni} />
     )  
 }
 
 
-export function SorS(props) {
-    const[results, setResults] = useState({});  
-    // Array of JSON objects is named SorS- results={SorS: [Array of Rows]}
+function SorS(props) {
+    const[results, setResults] = useState([]);  
+    // Results is array of JSON objects
     // Need GET method for json, use props.uni to call   
     return (
-        // {SorS.map((row,i) => (
-        //     <tr key={i}>
-        //         {Object.values(row).map((cell) => (
-        //             <td>{cell}</td>
-        //         ))}
-        //     </tr>
-        // ))}
-        <div />
+        /*{results.map((row,i) => (
+            <tr key={i}>
+                {Object.values(row).map((cell) => (
+                    <td>{cell}</td>
+                ))}
+            </tr>
+        ))}*/
     );
 }
 
-export function Tabs(props) {
+
+function Tabs(props) {
+    const [value, setValue] = React.useState('1');
+
+    const handleChange = (event, newValue) => {
+        setValue(newValue);
+    };
+
     return (
-        <Tabs>
-            <TabList>
-                <Tab>Workouts</Tab>
-                <Tab>SorS</Tab>
-                <TabPanel>
+        <Box sx={{ width: '100%', typography: 'body1' }}>
+            <TabContext value={value}>
+                <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
+                    <TabsList value={value} onChange={handleChange}>
+                        <Tab label="Workouts" value="1"/>
+                        <Tab label="SorS" value="2"/>
+                    </TabsList>
+                </Box>
+                <TabPanel value="1">
                     <Workouts uni={this.props.uni} />
                 </TabPanel>
-                <TabPanel>
+                <TabPanel value="2">
                     <SorS uni={this.props.uni}/>
                 </TabPanel>
-            </TabList>
-        </Tabs>
+            </TabContext>            
+        </Box>  
     );        
 
 }
 
-export function Page(props) {
+export default function Page(props) {
     const[uni, setUni] = useState('');
     const[name, setName] = useState('');
 
-    const handleChange = (newUni, newName) => {
+    const handleChange= (newUni, newName) => {
         setUni(newUni);
         setName(newName);
     }
 
     return(
         <div>
-            <Menu onChange={handleChange} />
+            <RowerMenu onChange={handleChange} />
             <h1>{name}</h1>
-            <Tabs uni={this.state.uni} />
+            <Tabs uni={uni} />
         </div>
     )
 }
-
-export default Menu
-//ReactDOM.render(<Page />, document.getElementById('coach_view'))
