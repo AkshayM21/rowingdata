@@ -68,7 +68,7 @@ function Card(props){
     )
 }
 
-function Deck(props) {
+function Workouts(props) {
     // Need GET method for workouts json:{workouts:[{row1}, {row2}, etc], use props.uni to call
     // Pass workouts array of json objects to workouts state
     const[workouts, setWorkouts]= useState([]);
@@ -84,12 +84,6 @@ function Deck(props) {
             </Grid>              
         </Box>
     );   
-}
-
-function Workouts(props) {
-    return(
-        <Deck uni={this.props.uni} />
-    )  
 }
 
 
