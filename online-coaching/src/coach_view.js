@@ -4,7 +4,7 @@ import {UserContext} from "./providers/UserProvider"
 import Page from "./Page";
 
 
-export default function Rower(){
+export default function Coach(){
     const user = useContext(UserContext)
     const [redirect, setredirect] = useState(null)
 
