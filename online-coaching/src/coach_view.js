@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
-import {Box, Drawer, Tab, TabContext, Drawer,Typography, Grid, Toolbar, Divider, MenuList, ListItemText}  from '@mui/material';
-import Card from '@mui/material/Card';
+import {Box, Drawer, Tab, Card, CardContent, Typography, Grid, Toolbar, Divider, MenuList, MenuItem, ListItemText}  from '@mui/material';
+import { TabContext, TabList, TabPanel } from '@mui/lab';
 //import CardActions from '@mui/material/CardActions';
 
 const drawerWidth = 240;
@@ -120,10 +120,10 @@ function Tabs(props) {
         <Box sx={{ width: '100%', typography: 'body1' }}>
             <TabContext value={value}>
                 <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
-                    <TabsList value={value} onChange={handleChange}>
+                    <TabList value={value} onChange={handleChange}>
                         <Tab label="Workouts" value="1"/>
                         <Tab label="SorS" value="2"/>
-                    </TabsList>
+                    </TabList>
                 </Box>
                 <TabPanel value="1">
                     <Workouts uni={this.props.uni} />
