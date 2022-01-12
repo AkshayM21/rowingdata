@@ -1,4 +1,6 @@
-import React, { useState } from 'react'
+import React, { useState , useEffect, useContext} from 'react'
+import { Navigate } from "react-router-dom";
+import { UserContext } from "./providers/UserProvider"
 import {Box, Drawer, Tab, Card, CardContent, Typography, Grid, Toolbar, Divider, MenuList, MenuItem, ListItemText}  from '@mui/material';
 import { TabContext, TabList, TabPanel } from '@mui/lab';
 //import CardActions from '@mui/material/CardActions';
@@ -134,6 +136,19 @@ function RowerTabs(props) {
 }
 
 function Page(props) {
+    const user = useContext(UserContext)
+    const [redirect, setredirect] = useState(null)
+
+    useEffect(() => {
+        if (!user) {
+        setredirect('/')
+        }
+    }, [user])
+
+    if (redirect) {
+        return <Navigate to={redirect}/>
+    }
+        
     const[uni, setUni] = useState('');
     const[name, setName] = useState('');
 
