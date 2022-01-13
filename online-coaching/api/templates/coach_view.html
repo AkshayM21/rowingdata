@@ -1,7 +1,5 @@
 {% extends layout.html %}
 {% block content %}
-    <h1>Rowers</h1>
-    {% for uni,name  in {{ rowers_dictionary.items() }} %}
-        <p><a href='/workouts/'+uni>{{ name }}</a></p>
-    {% endfor %}
+    <main id="coach_view"></main>
+    <script src="/coach_view.compiled.js"></script>
 {% endblock content %}
