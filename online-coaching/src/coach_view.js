@@ -11,6 +11,7 @@ const drawerWidth = 240;
 
 function RowerCard(props){
     // Workout json passed down from deck
+    
     return(        
         <Card style={{ width: '16rem' }}>
             <CardContent>
@@ -36,6 +37,12 @@ function Workouts(props) {
     // Pass workouts array of json objects to workouts state
     const[workouts, setWorkouts]= useState([{'date': '01/15/21', 'rpe': '10', 'workout_description':'3x19'}, {'date': '01/18/21', 'rpe': '15', 'workout_description':'3x19'}]);
     
+    /*useEffect(() => {
+        get(props.uni).then((response) => {
+            setWorkouts(response);
+        });
+    }, [props.uni])*/
+    
     return(
         <Box>
             <Grid container spacing={{ xs: 2, sm: 3 }} >
@@ -54,6 +61,13 @@ function SorS(props) {
     const[results, setResults] = useState([{'id': '01/15/21', 'rpe': '10', 'workout_description':'3x19'}, {'id': '01/18/21', 'rpe': '15', 'workout_description':'3x19'}]);  
     // Results is array of JSON objects
     // Need GET method for json, use props.uni to call   
+    
+    /*useEffect(() => {
+        get(props.uni).then((response) => {
+            setResults(response);
+        });
+    }, [props.uni])*/
+    
     const rows= results;
     const columns= [
         { field: 'id', headerName: 'Date', width: 150 },
