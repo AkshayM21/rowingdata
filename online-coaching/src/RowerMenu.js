@@ -9,6 +9,12 @@ export class RowerMenu extends React.Component {
         this.state={rowers: {'jl6078': 'Jonathan Liu', 'uni2':'Name2'}};
         this.handleChange = this.handleChange.bind(this);
     }
+    
+    /*componentDidMount() {
+        fetch('/api/rower_dictionary').then((response) => {
+            this.setState({rowers: response})          
+        });
+    }*/
 
     handleChange = (e) => {
         const uni= e.target.value;
