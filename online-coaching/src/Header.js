@@ -3,7 +3,6 @@ import {makeStyles} from "@mui/styles"
 import React, {useState, useEffect, useContext} from "react";
 import {logOut} from "./services/firebase"
 import { UserContext } from './providers/UserProvider';
-import { dividerClasses } from "@mui/material";
 
 
 export function Header() {

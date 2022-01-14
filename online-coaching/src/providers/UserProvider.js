@@ -22,10 +22,13 @@ export default (props) => {
             }).then((data) => {
                 if(data.isValid==="True" || data.isValid==="true"){
                     //later we'll check if its a student or a coach and direct to the appropriate page
+                    const student = (data.isStudent=="True" || data.isStudent=="true")
                     setuser({
-                        displayName,
-                        email
+                        name: displayName,
+                        email: email,
+                        isStudent: student
                     })
+
                 }else{
                     alert("Invalid email. Please try again with a valid Columbia email.")
                 //display error message

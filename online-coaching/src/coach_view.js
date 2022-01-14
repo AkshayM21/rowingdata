@@ -112,19 +112,17 @@ function RowerTabs(props) {
 }
 
 function Page(props) {
-    /*const user = useContext(UserContext)
+    const user = useContext(UserContext)
     const [redirect, setredirect] = useState(null)
 
     useEffect(() => {
         if (!user) {
-        setredirect('/')
+            setredirect('/')
+        }else if(user.isStudent){
+            setredirect('/rower_view')
         }
     }, [user])
-
-    if (redirect) {
-        return <Navigate to={redirect}/>
-    }*/
-        
+  
     const[uni, setUni] = useState('');
     const[name, setName] = useState('');
 
@@ -133,6 +131,10 @@ function Page(props) {
         setName(newName);
     }
 
+    if (redirect) {
+        return <Navigate to={redirect}/>
+    }
+      
     return(
         <div>
             <RowerMenu onClick={() => changeName} />

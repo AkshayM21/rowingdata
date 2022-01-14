@@ -1,4 +1,4 @@
-import React, {Component, setState} from "react"
+import React, {Component} from "react"
 import moment from 'moment'
 import AdapterMoment from '@mui/lab/AdapterMoment';
 import LocalizationProvider from '@mui/lab/LocalizationProvider';
@@ -8,9 +8,7 @@ import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
 import Grid from "@mui/material/Grid";
 import TextField from "@mui/material/TextField";
-import FormControlLabel from "@mui/material/FormControlLabel";
 import FormControl from "@mui/material/FormControl";
-import FormLabel from "@mui/material/FormLabel";
 import InputLabel from "@mui/material/InputLabel";
 import Select from "@mui/material/Select";
 import MenuItem from "@mui/material/MenuItem";
@@ -20,7 +18,6 @@ import Snackbar from '@mui/material/Snackbar';
 import IconButton from '@mui/material/IconButton';
 import CloseIcon from '@mui/icons-material/Close';
 
-import {makeStyles} from "@mui/styles"
 class SubmissionForm extends Component{
 
 
@@ -61,8 +58,8 @@ class SubmissionForm extends Component{
     }
 
     isSubmittable(){
-        if(this.state.uni!="" && this.state.isValidUni && this.state.date!=null && this.state.description!="" 
-        && this.state.time_on!=null && this.state.workout_type!="" && this.state.rpe!="" && this.state.isFilePicked){
+        if(this.state.uni!=="" && this.state.isValidUni && this.state.date!==null && this.state.description!=="" 
+        && this.state.time_on!==null && this.state.workout_type!=="" && this.state.rpe!=="" && this.state.isFilePicked){
             return true;
         }
         return false;
@@ -100,7 +97,6 @@ class SubmissionForm extends Component{
                       date: null,
                       description: '',
                       time_on: null,
-                      workout_type: '',
                       rpe: '',
                       file:'',
                       isFilePicked: false,
@@ -108,6 +104,9 @@ class SubmissionForm extends Component{
                       isValidUni: true,
                       snackBarOpen: true
                     })
+                    
+
+
       
                 } else {
                     console.log(result)
@@ -193,7 +192,7 @@ class SubmissionForm extends Component{
                 <Typography style={{marginTop: "25px"}} variant="h6" gutterBottom component="div">
                     Submit Workout Data
                 </Typography>
-                <form onSubmit={this.handleSubmit}>
+                <form id="submission-form" onSubmit={this.handleSubmit}>
                     <Grid container rowSpacing={2} alignItems="center" justifyContent="space-around" direction="column">
                         <Grid item>
                             <TextField

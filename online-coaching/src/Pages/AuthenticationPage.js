@@ -10,7 +10,11 @@ export default function Login() {
 
   useEffect(() => {
     if (user) {
-      setredirect('/rower_view')
+      if(user.isStudent){
+        setredirect('/rower_view')
+      }else{
+        setredirect('/coach_view')
+      }
     }
   }, [user])
   if (redirect) {

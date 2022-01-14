@@ -10,7 +10,9 @@ export default function Rower(){
 
     useEffect(() => {
         if (!user) {
-        setredirect('/')
+            setredirect('/')
+        }else if(!user.isStudent){
+            setredirect('/coach_view')
         }
     }, [user])
 
