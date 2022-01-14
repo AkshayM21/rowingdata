@@ -38,10 +38,7 @@ def save_to_cloud(df, file_name):
   storage.bucket(app=firebase).blob("rower_stats/"+file_name).upload_from_string(df.to_csv(), "text/csv")
 
 def get_from_cloud(file_name):
-  if(file_name!="SorS.csv"):
-    return pd.read_csv(io.BytesIO(storage.bucket(app=firebase).blob("rower_stats/"+file_name).download_as_bytes()))
-  else:
-    return pd.read_csv(io.BytesIO(storage.bucket(app=firebase).blob("rower_stats/"+file_name).download_as_bytes()))
+  return pd.read_csv(io.BytesIO(storage.bucket(app=firebase).blob("rower_stats/"+file_name).download_as_bytes()))
 
 def get_from_cloud_with_col(file_name, index_col):
   return pd.read_csv(io.BytesIO(storage.bucket(app=firebase).blob("rower_stats/"+file_name).download_as_bytes()), index_col=index_col)
@@ -85,6 +82,14 @@ def is_auth_user():
       "isValid": "False"
     }
 
+@app.route("/workouts", methods=['GET'])
+def workouts():
+  return { "data": get_workouts(request.args.get('uni')) }
+
+@app.route("/sors", methods=['GET'])
+def sors():
+  return { "data": get_sors(request.args.get('uni')) }
+
 @app.route('/rowers', methods=['GET'])
 def rowers():
   email_list = rowers_df['Email']
@@ -92,6 +97,12 @@ def rowers():
   return {
       "unis": unis
   }
+
+@app.route('/rower_list', methods=['GET'])
+def rower_list():
+  return { "rowers": [{"uni": email.split("@")[0], "name": name} for email, name in zip(rowers_df['Email'], rowers_df['Name'])] }
+
+
 
 #page that covers rower's data
 #need to keep track of all parameters we will need
@@ -222,6 +233,53 @@ def parse(df, params):
         #output_df.to_csv(params["output_path"])
         return pd.concat([past_data_df, output_df])
 
+def get_sors(uni):
+  df = get_from_cloud("SorS.csv")
+  
+  return [{
+    "date": row[2],
+    "boat_class": row[3],
+    "rank": row[4],
+    "avg_time": row[5],
+    "avg_wbt": row[6],
+    "piece_1_time": row[7],
+    "piece_1_wbt": row[8],
+    "piece_2_time": row[9],
+    "piece_2_wbt": row[10],
+    "piece_3_time": row[11],
+    "piece_3_wbt": row[12],
+  } for row in df[df["uni"]==uni].itertuples()]
+
+
+
+def get_workouts(uni):
+  df = get_from_cloud(uni+".csv")
+
+  if(df.empty):
+    return {}
+  else:
+    df = get_from_cloud_with_col(uni+".csv", 0)
+  
+  return [{
+      "date": row[0],
+      "workout_type": row[1],
+      "avg_power": row[2],
+      "avg_stroke_rate": row[3],
+      "avg_stroke_length": row[4],
+      "avg_pulse": row[5],
+      "avg_energy_per_stroke": row[6],
+      "avg_500m_time": row[7],
+      "leg_2_avg_power": row[8],
+      "leg_2_avg_pulse": row[9],
+      "leg_3_avg_power": row[10],
+      "leg_3_avg_pulse": row[11],
+      "decoupling_rate": row[12],
+      "rpe": row[13],
+      "description": row[14]
+    } for row in df.itertuples()]
+    
+      
+    
 
 # returns a list of tuples of row ranges in the dataframe that are valid data
 # valid, ie, not during a break period
