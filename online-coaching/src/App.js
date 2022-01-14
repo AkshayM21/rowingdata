@@ -7,7 +7,7 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import UserProvider from "./providers/UserProvider";
 import Base from './Base'
 import Rower from "./rower_view"
-import {Page} from "./coach_view"
+import Page from "./coach_view"
 import {Header} from "./Header"
 
 

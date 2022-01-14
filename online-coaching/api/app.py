@@ -2,8 +2,8 @@ from flask import Flask
 from flask import render_template
 from flask import request
 from flask import current_app
-from parsing import parse
 import os
+import io
 import json
 import pandas as pd
 from firebase_admin import credentials, initialize_app, storage
@@ -36,6 +36,15 @@ with app.app_context():
 # NB: gsutil command for copying a saved stats sheet to computer --  gsutil cp gs://REDACTED_PROJECT_ID.appspot.com/rower_stats/test.csv Documents/GitHub/rowingdata/online-coaching/api/output/test.csv
 def save_to_cloud(df, file_name):
   storage.bucket(app=firebase).blob("rower_stats/"+file_name).upload_from_string(df.to_csv(), "text/csv")
+
+def get_from_cloud(file_name):
+  if(file_name!="SorS.csv"):
+    return pd.read_csv(io.BytesIO(storage.bucket(app=firebase).blob("rower_stats/"+file_name).download_as_bytes()))
+  else:
+    return pd.read_csv(io.BytesIO(storage.bucket(app=firebase).blob("rower_stats/"+file_name).download_as_bytes()))
+
+def get_from_cloud_with_col(file_name, index_col):
+  return pd.read_csv(io.BytesIO(storage.bucket(app=firebase).blob("rower_stats/"+file_name).download_as_bytes()), index_col=index_col)
 
 
 def isRower(email):
@@ -76,20 +85,29 @@ def is_auth_user():
       "isValid": "False"
     }
 
+@app.route('/rowers', methods=['GET'])
+def rowers():
+  email_list = rowers_df['Email']
+  unis = [email.split("@")[0] for email in email_list]
+  return {
+      "unis": unis
+  }
 
 #page that covers rower's data
 #need to keep track of all parameters we will need
 #need to add post form in submit.html
 #decoupling will be implemented as a boolean for decoupling
-@app.route('/submit', methods=['GET', 'POST'])
+@app.route('/submit', methods=['POST'])
 def submit():
     params = {}
-    params['break_time']=int(request.form['break_time'])
     params['on_time']=int(request.form['on_time'])
-    params["decoupling"]=request.form['decoupling']=="True"
+    params["workout_type"]=request.form['workout_type']
     params['name'] = request.form['name']
+    params['date'] = request.form['date']
+    params['description'] = request.form['description']
+    params['rpe'] = int(request.form['rpe'])
     save_to_cloud(parse(pd.read_csv(request.files['file']), params), params['name']+".csv")
-    return "200"
+    return "{}"
     # with open('/CSVs/params.json', 'w') as output:
     #     json.dump(params, output)
 
@@ -98,6 +116,139 @@ def submit():
 #     path='/CSVs'
 #     file_path = os.path.join(path, file.filename)
 #     open(file_path, 'w').write(file.read())
+
+
+# todo: currently, the parse method makes a new csv for each workout -- change to editing 1 csv for each player (by id)
+# note - returns output csv as a pandas dataframe
+# params is a dictionary containing parameters relevant for parsing
+# eg, "workout_type" is a string indicating the type of workout (e.g. decoupling)
+# "on_time" indicates in seconds the lengths of reps (ie, that aren't on break)
+# "name" indicates the ID of the rower
+def parse(df, params):
+    #df = pd.read_csv(params["path"])
+    
+
+    ranges = find_valid_ranges(df, params["on_time"])
+
+    count = 0
+    power_sum = 0
+    stroke_rate_sum = 0
+    stroke_length_sum = 0
+    pulse_sum = 0 #if not connected, pulse sum will remain zero after summing across ranges, so the average will be zero
+    energy_per_stroke_sum = 0
+    meters_500_split = 0
+    for interval in ranges:
+        count+=interval[1]-interval[0]
+        power_sum+=df["power"][interval[0]:interval[1]].sum(axis=0)
+        stroke_rate_sum+=df["stroke_rate"][interval[0]:interval[1]].sum(axis=0)
+        stroke_length_sum+=df["stroke_length"][interval[0]:interval[1]].sum(axis=0)
+        pulse_sum+=df["pulse"][interval[0]:interval[1]].sum(axis=0)
+        energy_per_stroke_sum+=df["energy_per_stroke"][interval[0]:interval[1]].sum(axis=0)
+        meters_500_split+=df["estimated_500m_time"][interval[1]-1]
+    avg_power = power_sum/count
+    avg_stroke_rate = stroke_rate_sum/count
+    avg_stroke_length = stroke_length_sum/count
+    avg_pulse = pulse_sum/count
+    avg_energy_per_stroke = energy_per_stroke_sum/count
+    avg_500_split = meters_500_split/len(ranges) #since it is only 1 measurement per set of reps, instead of 1 per rep
+
+    past_data_df = get_from_cloud(params['name']+".csv")
+  
+    if(not past_data_df.empty):
+      past_data_df = get_from_cloud_with_col(params['name']+".csv", 0)
+    
+    print(past_data_df)
+
+
+    ##could/should refactor the below if statement to be more efficient/reuse less code but its late so ill do this later or something
+
+    #find averages across columns
+    if(params["workout_type"]=="decoupling"): #it is a decoupling workout - find avg_power to avg_heart_rate ratio
+        #decoupling workouts should have 3 legs; use ranges[1] and ranges[2] for relevant ranges
+        #saving 5 things -- avg_power and avg_pulse for the last two legs, and the percent change of power:pulse ratio btwn legs
+        leg_2_avg_power = df["power"][ranges[1][0]:ranges[1][1]].sum(axis=0)/(ranges[1][1]-ranges[1][0])
+        leg_2_avg_pulse = df["pulse"][ranges[1][0]:ranges[1][1]].sum(axis=0) / (ranges[1][1] - ranges[1][0])
+        leg_3_avg_power = df["power"][ranges[2][0]:ranges[2][1]].sum(axis=0) / (ranges[2][1] - ranges[2][0])
+        leg_3_avg_pulse = df["pulse"][ranges[2][0]:ranges[2][1]].sum(axis=0) / (ranges[2][1] - ranges[2][0])
+        decoupling_rate = (leg_3_avg_power/leg_3_avg_pulse - leg_2_avg_power/leg_2_avg_pulse)/(leg_2_avg_power/leg_2_avg_pulse)
+        output_df = pd.DataFrame(
+            {
+                "workout_type":params['workout_type'],
+                "avg_power": avg_power,
+                "avg_stroke_rate": avg_stroke_rate,
+                "avg_stroke_length": avg_stroke_length,
+                "avg_pulse": avg_pulse,
+                "avg_energy_per_stroke": avg_energy_per_stroke,
+                "avg_500m_time": avg_500_split,
+                "leg_2_avg_power":leg_2_avg_power,
+                "leg_2_avg_pulse":leg_2_avg_pulse,
+                "leg_3_avg_power":leg_3_avg_power,
+                "leg_3_avg_pulse":leg_3_avg_pulse,
+                "decoupling_rate":decoupling_rate,
+                "rpe":params['rpe'],
+                "description":params['description']
+            }, index=[params['date']]
+        )
+
+        print(output_df)
+
+        dfresult = pd.concat([past_data_df, output_df])
+
+        print(dfresult)
+        return dfresult
+
+        #output_df.to_csv(params["output_path"])
+        
+    else:
+        output_df = pd.DataFrame(
+            {
+                "workout_type":params['workout_type'],
+                "avg_power":avg_power,
+                "avg_stroke_rate":avg_stroke_rate,
+                "avg_stroke_length":avg_stroke_length,
+                "avg_pulse":avg_pulse,
+                "avg_energy_per_stroke":avg_energy_per_stroke,
+                "avg_500m_time":avg_500_split,
+                "leg_2_avg_power":"",
+                "leg_2_avg_pulse":"",
+                "leg_3_avg_power":"",
+                "leg_3_avg_pulse":"",
+                "decoupling_rate":"",
+                "rpe":params['rpe'],
+                "description":params['description']
+            },index=[params['date']]
+        )
+
+        #output_df.to_csv(params["output_path"])
+        return pd.concat([past_data_df, output_df])
+
+
+# returns a list of tuples of row ranges in the dataframe that are valid data
+# valid, ie, not during a break period
+# note: tuple ranges are start inclusive, end exclusive -- [start, end) -- as this captures the desired rows using slices
+# on_time is in seconds, amount of time spent for each stretch of the workout (between breaks)
+def find_valid_ranges(df, on_time):
+
+    # basic intuition: find every stroke that is number 1, determine if the range btwn the ones is a break or not
+    stroke_one_rows = df[df['stroke_number']==1]
+
+    range_list = []
+
+    #note -- the ranges in these tuples are exclusive -- [start, end) -- because that's how pandas treats ranges
+    #so the end range index will point to the index immediately after the actual end of range
+    for i in range(0, len(stroke_one_rows.index)-1):
+        range_list.append((stroke_one_rows.index[i], stroke_one_rows.index[i+1]))
+    range_list.append((stroke_one_rows.index[len(stroke_one_rows.index)-1], len(df.index))) # last range (goes till end), not covered by loop
+
+    if (len(stroke_one_rows.index) == 1):  # only 1 instance of a #1 stroke -- means no breaks in the workout, so only 1 tuple (go till end)
+        return range_list
+
+    for interval in range_list: #remove breaks
+        end_time = df["time"][interval[1]-1]
+        if(abs(end_time-on_time)>2): #more than 2 seconds away from a rep_time, label as break
+            range_list.remove(interval)
+
+    return range_list
 
 
 if __name__ == '__main__':

@@ -1,4 +1,4 @@
-import { AppBar, Toolbar, Typography, Button} from "@material-ui/core";
+import { AppBar, Toolbar, Typography, Button} from "@mui/material";
 import {makeStyles} from "@mui/styles"
 import React, {useState, useEffect, useContext} from "react";
 import {logOut} from "./services/firebase"
