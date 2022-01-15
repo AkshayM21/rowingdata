@@ -260,7 +260,7 @@ def get_workouts(uni):
   df = get_from_cloud(uni+".csv")
 
   if(df.empty):
-    return {}
+    return []
   else:
     df = get_from_cloud_with_col(uni+".csv", 0)
   
