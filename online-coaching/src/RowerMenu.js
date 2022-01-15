@@ -5,14 +5,14 @@ const drawerWidth = 240;
 function RowerMenu(props)  {
     const[rowers, setRowers]= useState({});
     
-    
     useEffect(() => {
-        fetch('/rower_list').then((response) => response.json())
+        fetch('/rower_list')
+        .then((response) => response.json())
         .then(response => {
-            setRowers(response);          
+            setRowers(response);      
         });
-    }, {})
-   
+    }, [])
+    
     return (
         <Box sx={{ mt: 10, width: '40%'}}>
             <Drawer
@@ -29,7 +29,7 @@ function RowerMenu(props)  {
                 <Divider />
                 <MenuList>
                     {Object.entries(rowers).map(([uni, name]) => (
-                        <MenuItem value={uni} onClick={() =>props.onClick(uni, name)}>
+                        <MenuItem key={uni} onClick={() =>props.onClick(uni, name)}>
                             <ListItemText primary={name}/>
                         </MenuItem>
                     ))}
@@ -39,3 +39,5 @@ function RowerMenu(props)  {
         </Box>
     );
 }
+
+export default RowerMenu

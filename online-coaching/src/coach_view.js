@@ -38,12 +38,14 @@ function Workouts(props) {
     // Pass workouts array of json objects to workouts state
     const[workouts, setWorkouts]= useState([{'date': '01/15/21', 'rpe': '10', 'workout_description':'3x19'}, {'date': '01/18/21', 'rpe': '15', 'workout_description':'3x19'}]);
     const uni= props.uni;
+
     useEffect(() => {
         fetch(`/workouts?uni=${uni}`).then((response) => response.json())
         .then(response => {
             setWorkouts(response.data);
         });
-    })
+
+    }, [])
     
     return(
         <Box>
@@ -76,7 +78,7 @@ function SorS(props) {
     const columns= [
         { field: 'date', headerName: 'Date', width: 80 },
         { field: 'boat_class', headerName: 'Boat Class', width: 100 },
-        { field: 'rank', headerName: 'Rank', width: 60 },
+        { field: 'rank', headerName: 'Rank', width: 60 },   
         { field: 'avg_time', headerName: 'Average Time', width: 120 },
         { field: 'avg_wbt', headerName: 'Average WBT%', width: 120 },
         { field: 'piece_1_time', headerName: 'Piece 1 Time', width: 120 },
@@ -129,20 +131,24 @@ function Page(props) {
 
     useEffect(() => {
         if (!user) {
-        setredirect('/')
+            setredirect('/')
+        }else if(user.isStudent){
+            setredirect('/rower_view')
         }
     }, [user])
 
-    if (redirect) {
-        return <Navigate to={redirect}/>
-    }
+    
         
-    const[uni, setUni] = useState('');
+    const[uni, setUni] = useState('abs2267');
     const[name, setName] = useState('Ayush Saini');
 
     const changeName = (newUni, newName) => {
         setUni(newUni);
         setName(newName);
+    }
+
+    if (redirect) {
+        return <Navigate to={redirect}/>
     }
 
     return(

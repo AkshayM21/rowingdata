@@ -240,6 +240,7 @@ def get_sors(uni):
   df = get_from_cloud("SorS.csv")
   
   return [{
+    "id": row.Index,
     "date": row[2],
     "boat_class": row[3],
     "rank": row[4],
@@ -249,8 +250,8 @@ def get_sors(uni):
     "piece_1_wbt": row[8],
     "piece_2_time": row[9],
     "piece_2_wbt": row[10],
-    "piece_3_time": row[11],
-    "piece_3_wbt": row[12],
+    "piece_3_time": row[11] if not pd.isnull(row[11]) else "",
+    "piece_3_wbt": row[12] if not pd.isnull(row[12]) else "",
   } for row in df[df["uni"]==uni].itertuples()]
 
 
@@ -272,11 +273,11 @@ def get_workouts(uni):
       "avg_pulse": row[5],
       "avg_energy_per_stroke": row[6],
       "avg_500m_time": row[7],
-      "leg_2_avg_power": row[8],
-      "leg_2_avg_pulse": row[9],
-      "leg_3_avg_power": row[10],
-      "leg_3_avg_pulse": row[11],
-      "decoupling_rate": row[12],
+      "leg_2_avg_power": row[8] if not pd.isnull(row[8]) else "",
+      "leg_2_avg_pulse": row[9] if not pd.isnull(row[9]) else "",
+      "leg_3_avg_power": row[10] if not pd.isnull(row[10]) else "",
+      "leg_3_avg_pulse": row[11] if not pd.isnull(row[11]) else "",
+      "decoupling_rate": row[12] if not pd.isnull(row[12]) else "",
       "rpe": row[13],
       "description": row[14]
     } for row in df.itertuples()]
