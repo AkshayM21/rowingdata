@@ -29,7 +29,7 @@ function RowerMenu(props)  {
                 <Divider />
                 <MenuList>
                     {Object.entries(rowers).map(([uni, name]) => (
-                        <MenuItem value={uni} onClick={(uni, name) =>props.onClick(uni, name)}>
+                        <MenuItem value={uni} onClick={() =>props.onClick(uni, name)}>
                             <ListItemText primary={name}/>
                         </MenuItem>
                     ))}
