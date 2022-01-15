@@ -4,7 +4,8 @@ import { UserContext } from "./providers/UserProvider"
 import {Box, Drawer, Tab, Card, CardContent, Typography, Grid, Toolbar, Divider, MenuList, MenuItem, ListItemText}  from '@mui/material';
 import { TabContext, TabList, TabPanel } from '@mui/lab';
 import { DataGrid } from '@mui/x-data-grid';
-import { RowerMenu } from "./RowerMenu";
+import RowerMenu from "./RowerMenu";
+import { areDayPropsEqual } from '@mui/lab/PickersDay/PickersDay';
 //import CardActions from '@mui/material/CardActions';
 
 const drawerWidth = 240;
@@ -19,10 +20,10 @@ function RowerCard(props){
                     {props.workout['date']}
                 </Typography>
                 <Typography>
-                    Workout:{props.workout['workout_description']}
+                    Workout: {props.workout['workout_description']}
                 </Typography>
                 <Typography sx={{ fontSize: 14 }}>
-                    RPE:{props.workout['rpe']}
+                    RPE: {props.workout['rpe']}
                 </Typography>
             </CardContent>
             {/*<CardActions>
@@ -36,12 +37,13 @@ function Workouts(props) {
     // Need GET method for workouts json:{workouts:[{row1}, {row2}, etc], use props.uni to call
     // Pass workouts array of json objects to workouts state
     const[workouts, setWorkouts]= useState([{'date': '01/15/21', 'rpe': '10', 'workout_description':'3x19'}, {'date': '01/18/21', 'rpe': '15', 'workout_description':'3x19'}]);
-    
-    /*useEffect(() => {
-        get(props.uni).then((response) => {
-            setWorkouts(response);
+    const uni= props.uni;
+    useEffect(() => {
+        fetch(`/workouts?uni=${uni}`).then((response) => response.json())
+        .then(response => {
+            setWorkouts(response.data);
         });
-    }, [props.uni])*/
+    })
     
     return(
         <Box>
@@ -58,25 +60,35 @@ function Workouts(props) {
 
 
 function SorS(props) {
-    const[results, setResults] = useState([{'id': '01/15/21', 'rpe': '10', 'workout_description':'3x19'}, {'id': '01/18/21', 'rpe': '15', 'workout_description':'3x19'}]);  
+    const[results, setResults] = useState([]);  
+    const uni= props.uni;
     // Results is array of JSON objects
     // Need GET method for json, use props.uni to call   
     
-    /*useEffect(() => {
-        get(props.uni).then((response) => {
-            setResults(response);
+    useEffect(() => {
+        fetch(`/sors?uni=${uni}`).then((response) => response.json())
+        .then(response => {
+            setResults(response.data);
         });
-    }, [props.uni])*/
+    }, [])
     
     const rows= results;
     const columns= [
-        { field: 'id', headerName: 'Date', width: 150 },
-        { field: 'rpe', headerName: 'RPE', width: 150 },
-        { field: 'workout_description', headerName: 'Workout: ', width: 150 }
+        { field: 'date', headerName: 'Date', width: 80 },
+        { field: 'boat_class', headerName: 'Boat Class', width: 100 },
+        { field: 'rank', headerName: 'Rank', width: 60 },
+        { field: 'avg_time', headerName: 'Average Time', width: 120 },
+        { field: 'avg_wbt', headerName: 'Average WBT%', width: 120 },
+        { field: 'piece_1_time', headerName: 'Piece 1 Time', width: 120 },
+        { field: 'piece_1_wbt', headerName: 'Piece 1 WBT%', width: 125 },
+        { field: 'piece_2_time', headerName: 'Piece 2 Time', width: 120 },
+        { field: 'piece_2_wbt', headerName: 'Piece 2 WBT%', width: 125 },
+        { field: 'piece_3_time', headerName: 'Piece 3 Time', width: 120 },
+        { field: 'piece_3_wbt', headerName: 'Piece 3 WBT%', width: 125 }
     ]
 
     return (
-        <div style={{ height: 300, width: '100%' }}>
+        <div style={{ height: 300, width: '110%' }}>
             <DataGrid rows={rows} columns={columns} />
         </div>
     );
@@ -100,7 +112,7 @@ function RowerTabs(props) {
                     </TabList>
                 </Box>
                 <TabPanel value="1">
-                    <Workouts uni={props.uni} />
+                    <Workouts uni={props.uni}/>
                 </TabPanel>
                 <TabPanel value="2">
                     <SorS uni={props.uni}/>
@@ -117,30 +129,27 @@ function Page(props) {
 
     useEffect(() => {
         if (!user) {
-            setredirect('/')
-        }else if(user.isStudent){
-            setredirect('/rower_view')
+        setredirect('/')
         }
     }, [user])
-  
+
+    if (redirect) {
+        return <Navigate to={redirect}/>
+    }
+        
     const[uni, setUni] = useState('');
-    const[name, setName] = useState('');
+    const[name, setName] = useState('Ayush Saini');
 
     const changeName = (newUni, newName) => {
         setUni(newUni);
         setName(newName);
     }
 
-    if (redirect) {
-        return <Navigate to={redirect}/>
-    }
-      
     return(
         <div>
-            <RowerMenu onClick={() => changeName} />
-            {uni}
+            <RowerMenu onClick={changeName} />
+            <h1>{name} Profile</h1>
             <RowerTabs uni={uni} />
-            {uni}
         </div>
     )
 }
