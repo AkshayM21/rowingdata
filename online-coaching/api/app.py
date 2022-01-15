@@ -100,9 +100,12 @@ def rowers():
 
 @app.route('/rower_list', methods=['GET'])
 def rower_list():
-  return { "rowers": [{email.split("@")[0]: name} for email, name in zip(rowers_df['Email'], rowers_df['Name'])] }
-
-
+  email_list = rowers_df['Email']
+  uni_list = [email.split("@")[0] for email in email_list]
+  name_list = rowers_df['Name']
+  df2 = pd.DataFrame({'uni': uni_list, 'name': name_list})
+  column_order = ['uni', 'name']
+  return(dict(df2[column_order].values))
 
 #page that covers rower's data
 #need to keep track of all parameters we will need
