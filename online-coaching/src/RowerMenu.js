@@ -1,51 +1,41 @@
-import React from 'react'
+import React, { useState, useEffect } from 'react'
 import {Box, Drawer, Toolbar, Divider, MenuList, MenuItem, ListItemText}  from '@mui/material';
 
 const drawerWidth = 240;
-export class RowerMenu extends React.Component {
-    constructor(props) {
-        super(props);
-        // JSON of rower names, format {'jl6078': 'Jonathan Liu', 'uni2':'Name2'}
-        this.state={rowers: {'jl6078': 'Jonathan Liu', 'uni2':'Name2'}};
-        this.handleChange = this.handleChange.bind(this);
-    }
+function RowerMenu(props)  {
+    const[rowers, setRowers]= useState({});
     
-    /*componentDidMount() {
-        fetch('/api/rower_dictionary').then((response) => {
-            this.setState({rowers: response})          
+    
+    useEffect(() => {
+        fetch('/rower_list').then((response) => response.json())
+        .then(response => {
+            setRowers(response);          
         });
-    }*/
-
-    handleChange = (e) => {
-        const uni= e.target.value;
-        this.props.onClick(uni, this.state.rowers[uni]);
-    }
-
-    render() {      
-        return (
-            <Box sx={{ mt: 10, width: '40%'}}>
-                <Drawer
-                variant="permanent"
-                ModalProps={{
-                    keepMounted: true,
-                }}
-                sx={{
-                    display: { xs: 'block', sm: 'block' }, 
-                    '& .MuiDrawer-paper': { boxSizing: 'border-box', width: drawerWidth },
-                }}
-                >
-                    <Toolbar />
-                    <Divider />
-                    <MenuList>
-                        {Object.entries(this.state.rowers).map(([uni, name]) => (
-                            <MenuItem value={uni} >
-                                <ListItemText primary={name} value={uni} onClick={this.handleChange}/>
-                            </MenuItem>
-                        ))}
-                    </MenuList>
-                    <Divider />
-                </Drawer>
-            </Box>
-        );
-    }
+    }, {})
+   
+    return (
+        <Box sx={{ mt: 10, width: '40%'}}>
+            <Drawer
+            variant="permanent"
+            ModalProps={{
+                keepMounted: true,
+            }}
+            sx={{
+                display: { xs: 'block', sm: 'block' }, 
+                '& .MuiDrawer-paper': {top: '70px',  boxSizing: 'border-box', width: drawerWidth },
+            }}
+            >
+                <h3>Athletes</h3>
+                <Divider />
+                <MenuList>
+                    {Object.entries(rowers).map(([uni, name]) => (
+                        <MenuItem value={uni} onClick={(uni, name) =>props.onClick(uni, name)}>
+                            <ListItemText primary={name}/>
+                        </MenuItem>
+                    ))}
+                </MenuList>
+                <Divider />
+            </Drawer>
+        </Box>
+    );
 }
