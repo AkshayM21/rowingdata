@@ -34,47 +34,29 @@ function RowerCard(props){
 }
 
 function Workouts(props) {
-    // Need GET method for workouts json:{workouts:[{row1}, {row2}, etc], use props.uni to call
-    // Pass workouts array of json objects to workouts state
-    const[workouts, setWorkouts]= useState([{'date': '01/15/21', 'rpe': '10', 'workout_description':'3x19'}, {'date': '01/18/21', 'rpe': '15', 'workout_description':'3x19'}]);
-    const uni= props.uni;
 
-    useEffect(() => {
-        fetch(`/workouts?uni=${uni}`).then((response) => response.json())
-        .then(response => {
-            setWorkouts(response.data);
-        });
-
-    }, [workouts, uni])
+    if (props.workouts.length === 0) {
+        return(<h1>No Workouts Submitted</h1>)
+    } else {
+        return(
+            <Box>
+                <Grid container spacing={{ xs: 2, sm: 3 }} >
+                    {props.workouts.map((obj, index) => (
+                    // Currently set for 2 cards per column in xs, 4 per column for sm
+                    <Grid item xs={6} sm={3} key={index}>
+                        <RowerCard workout={obj}/>
+                    </Grid>))}
+                </Grid>              
+            </Box>
+        );  
+    }
     
-    return(
-        <Box>
-            <Grid container spacing={{ xs: 2, sm: 3 }} >
-                {workouts.map((obj, index) => (
-                // Currently set for 2 cards per column in xs, 4 per column for sm
-                <Grid item xs={6} sm={3} key={index}>
-                    <RowerCard workout={obj}/>
-                </Grid>))}
-            </Grid>              
-        </Box>
-    );   
 }
 
 
 function SorS(props) {
-    const[results, setResults] = useState([]);  
-    const uni= props.uni;
-    // Results is array of JSON objects
-    // Need GET method for json, use props.uni to call   
     
-    useEffect(() => {
-        fetch(`/sors?uni=${uni}`).then((response) => response.json())
-        .then(response => {
-            setResults(response.data);
-        });
-    }, [results, uni])
-    
-    const rows= results;
+    const rows= props.results;
     const columns= [
         { field: 'date', headerName: 'Date', width: 80 },
         { field: 'boat_class', headerName: 'Boat Class', width: 100 },
@@ -114,10 +96,10 @@ function RowerTabs(props) {
                     </TabList>
                 </Box>
                 <TabPanel value="1">
-                    <Workouts uni={props.uni}/>
+                    <Workouts workouts= {props.workouts} uni={props.uni}/>
                 </TabPanel>
                 <TabPanel value="2">
-                    <SorS uni={props.uni}/>
+                    <SorS results= {props.results} uni={props.uni}/>
                 </TabPanel>
             </TabContext>            
         </Box>  
@@ -137,15 +119,29 @@ function Page(props) {
         }
     }, [user])
 
-    
-        
-    const[uni, setUni] = useState('abs2267');
-    const[name, setName] = useState('Ayush Saini');
+    const[uni, setUni] = useState();
+    const[name, setName] = useState();
+    const[workouts, setWorkouts]= useState([]);
+    const[results, setResults] = useState([]); 
 
     const changeName = (newUni, newName) => {
         setUni(newUni);
         setName(newName);
     }
+
+    useEffect(() => {
+        fetch(`/workouts?uni=${uni}`).then((response) => response.json())
+        .then(response => {
+            setWorkouts(response.data);
+        });
+
+        fetch(`/sors?uni=${uni}`).then((response) => response.json())
+        .then(response => {
+            setResults(response.data);
+        });
+
+    }, [uni])
+
 
     if (redirect) {
         return <Navigate to={redirect}/>
@@ -155,7 +151,7 @@ function Page(props) {
         <div>
             <RowerMenu onClick={changeName} />
             <h1>{name} Profile</h1>
-            <RowerTabs uni={uni} />
+            <RowerTabs results= {results} workouts={workouts} uni={uni} />
         </div>
     )
 }
