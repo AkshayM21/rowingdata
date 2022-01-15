@@ -45,7 +45,7 @@ function Workouts(props) {
             setWorkouts(response.data);
         });
 
-    }, [])
+    }, [workouts, uni])
     
     return(
         <Box>
@@ -72,7 +72,7 @@ function SorS(props) {
         .then(response => {
             setResults(response.data);
         });
-    }, [])
+    }, [results, uni])
     
     const rows= results;
     const columns= [
