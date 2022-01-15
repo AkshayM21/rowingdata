@@ -100,7 +100,7 @@ def rowers():
 
 @app.route('/rower_list', methods=['GET'])
 def rower_list():
-  return { "rowers": [{"uni": email.split("@")[0], "name": name} for email, name in zip(rowers_df['Email'], rowers_df['Name'])] }
+  return { "rowers": [{email.split("@")[0]: name} for email, name in zip(rowers_df['Email'], rowers_df['Name'])] }
 
 
 
