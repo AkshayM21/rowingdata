@@ -37,11 +37,14 @@ with app.app_context():
 def save_to_cloud(df, folder_name, workout):
  storage.bucket(app=firebase).blob("rower_stats/"+folder_name+"/"+workout).upload_from_string(df.to_csv(), "text/csv")
 
-def get_from_cloud(folder_name, workout):
-  return pd.read_csv(io.BytesIO(storage.bucket(app=firebase).blob("rower_stats/"+folder_name+"/"+workout).download_as_bytes()))
+#def save_workout_to_cloud (save to path rower_stats/uni_folder/workout_id_folder/workout.csv)
+#def save_image_to_cloud (save to path rower_stats/uni_folder/workout_id_folder/profile.png)
 
-def get_from_cloud_with_col(file_name, workout_id, index_col):
-  return pd.read_csv(io.BytesIO(storage.bucket(app=firebase).blob("rower_stats/"+folder_name+"/"+workout_id).download_as_bytes()), index_col=index_col)\
+def get_from_cloud(folder_name):
+  return pd.read_csv(io.BytesIO(storage.bucket(app=firebase).blob("rower_stats/"+folder_name+"/workouts.csv"+).download_as_bytes()))
+
+def get_from_cloud_with_col(file_name, index_col):
+  return pd.read_csv(io.BytesIO(storage.bucket(app=firebase).blob("rower_stats/"+folder_name+"/workouts.csv").download_as_bytes()), index_col=index_col)
 
 #def get_img_from_cloud(uni, workout_id):
      #add functionality for pulling image from firebase
@@ -86,7 +89,7 @@ def is_auth_user():
 
 @app.route("/workouts", methods=['GET'])
 def workouts():
-  return { "data": get_workouts(request.args.get('uni'), request.args.get(''workout_id")) 
+  return { "data": get_workouts(request.args.get('uni')) 
               "img": get_image(request.args.get('uni'), request.args.get('workout_id'))}
 
 @app.route("/sors", methods=['GET'])
