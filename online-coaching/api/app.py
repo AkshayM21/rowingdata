@@ -34,15 +34,17 @@ with app.app_context():
 
 # saves pandas dataframe to the given output_path in firebase storage
 # NB: gsutil command for copying a saved stats sheet to computer --  gsutil cp gs://REDACTED_PROJECT_ID.appspot.com/rower_stats/test.csv Documents/GitHub/rowingdata/online-coaching/api/output/test.csv
-def save_to_cloud(df, file_name):
-  storage.bucket(app=firebase).blob("rower_stats/"+file_name).upload_from_string(df.to_csv(), "text/csv")
+def save_to_cloud(df, folder_name, workout):
+ storage.bucket(app=firebase).blob("rower_stats/"+folder_name+"/"+workout).upload_from_string(df.to_csv(), "text/csv")
 
-def get_from_cloud(file_name):
-  return pd.read_csv(io.BytesIO(storage.bucket(app=firebase).blob("rower_stats/"+file_name).download_as_bytes()))
+def get_from_cloud(folder_name, workout):
+  return pd.read_csv(io.BytesIO(storage.bucket(app=firebase).blob("rower_stats/"+folder_name+"/"+workout).download_as_bytes()))
 
-def get_from_cloud_with_col(file_name, index_col):
-  return pd.read_csv(io.BytesIO(storage.bucket(app=firebase).blob("rower_stats/"+file_name).download_as_bytes()), index_col=index_col)
+def get_from_cloud_with_col(file_name, workout_id, index_col):
+  return pd.read_csv(io.BytesIO(storage.bucket(app=firebase).blob("rower_stats/"+folder_name+"/"+workout_id).download_as_bytes()), index_col=index_col)\
 
+#def get_img_from_cloud(uni, workout_id):
+     #add functionality for pulling image from firebase
 
 def isRower(email):
   email_list = rowers_df['Email']
@@ -84,7 +86,8 @@ def is_auth_user():
 
 @app.route("/workouts", methods=['GET'])
 def workouts():
-  return { "data": get_workouts(request.args.get('uni')) }
+  return { "data": get_workouts(request.args.get('uni'), request.args.get(''workout_id")) 
+              "img": get_image(request.args.get('uni'), request.args.get('workout_id'))}
 
 @app.route("/sors", methods=['GET'])
 def sors():
@@ -151,6 +154,7 @@ def parse(df, params):
     pulse_sum = 0 #if not connected, pulse sum will remain zero after summing across ranges, so the average will be zero
     energy_per_stroke_sum = 0
     meters_500_split = 0
+    workout_id = df.iloc[0]["workout_id"]
     for interval in ranges:
         count+=interval[1]-interval[0]
         power_sum+=df["power"][interval[0]:interval[1]].sum(axis=0)
@@ -187,6 +191,7 @@ def parse(df, params):
         decoupling_rate = (leg_3_avg_power/leg_3_avg_pulse - leg_2_avg_power/leg_2_avg_pulse)/(leg_2_avg_power/leg_2_avg_pulse)
         output_df = pd.DataFrame(
             {
+                "workout_id"=workout_id,
                 "workout_type":params['workout_type'],
                 "avg_power": avg_power,
                 "avg_stroke_rate": avg_stroke_rate,
@@ -216,6 +221,7 @@ def parse(df, params):
     else:
         output_df = pd.DataFrame(
             {
+                "workout_id"="",
                 "workout_type":params['workout_type'],
                 "avg_power":avg_power,
                 "avg_stroke_rate":avg_stroke_rate,
@@ -256,34 +262,37 @@ def get_sors(uni):
 
 
 
-def get_workouts(uni):
-  df = get_from_cloud(uni+".csv")
+def get_workouts(uni, workout_id):
+  df = get_from_cloud(uni, workout_id+".csv")
 
   if(df.empty):
     return []
   else:
-    df = get_from_cloud_with_col(uni+".csv", 0)
+    df = get_from_cloud_with_col(uni, workout_id+".csv", 0)
   
   return [{
       "date": row[0],
-      "workout_type": row[1],
-      "avg_power": row[2],
-      "avg_stroke_rate": row[3],
-      "avg_stroke_length": row[4],
-      "avg_pulse": row[5],
-      "avg_energy_per_stroke": row[6],
-      "avg_500m_time": row[7],
-      "leg_2_avg_power": row[8] if not pd.isnull(row[8]) else "",
-      "leg_2_avg_pulse": row[9] if not pd.isnull(row[9]) else "",
-      "leg_3_avg_power": row[10] if not pd.isnull(row[10]) else "",
-      "leg_3_avg_pulse": row[11] if not pd.isnull(row[11]) else "",
-      "decoupling_rate": row[12] if not pd.isnull(row[12]) else "",
-      "rpe": row[13],
-      "description": row[14]
+      "workout_id": row[1]
+      "workout_type": row[2],
+      "avg_power": row[3],
+      "avg_stroke_rate": row[4],
+      "avg_stroke_length": row[5],
+      "avg_pulse": row[6],
+      "avg_energy_per_stroke": row[7],
+      "avg_500m_time": row[8],
+      "leg_2_avg_power": row[9] if not pd.isnull(row[8]) else "",
+      "leg_2_avg_pulse": row[10] if not pd.isnull(row[9]) else "",
+      "leg_3_avg_power": row[11] if not pd.isnull(row[10]) else "",
+      "leg_3_avg_pulse": row[12] if not pd.isnull(row[11]) else "",
+      "decoupling_rate": row[13] if not pd.isnull(row[12]) else "",
+      "rpe": row[14],
+      "description": row[15]
     } for row in df.itertuples()]
-    
-      
-    
+                                                                 
+#def get_image(uni, workout_id):
+     #img = get_img_from_cloud(uni, workout_id+".png")
+     #return image;    
+                                                                          
 
 # returns a list of tuples of row ranges in the dataframe that are valid data
 # valid, ie, not during a break period
