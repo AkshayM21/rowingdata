@@ -1,0 +1,200 @@
+---
+  title: "ForceProfile"
+output: html_document
+---
+  
+  ```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+  
+  
+  Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+
+#### R.Markdown 
+
+#### name list 
+Middle40min: all stroke data after 5 strokes for 40-min rowing 
+Middle20min: for 20-min rowing 
+Middle: all stroke data after 5 strokes for both 20-min and 40-min rowing 
+IMSE_mat: the table holds all the returned values from IMSE function 
+Indi_mse: MSE of the curve data for one individual 
+Indi_mean: mean value of the curve data for one 
+Indi_sqerr: squared errors of the curve data for one individual 
+Indi_sample: sample size of the curve data for one 
+indi_dfa: Detrended fluctuation analysis for one individual 
+FD: fractional dimension 
+
+#### IMPORTANT
+#### raw data with subjects' identified info has been saved in the local computer
+#### That is, it can't be found in the github repository
+
+```{r}
+#Library Packages Needed for Complete R Script
+library(lme4)
+library(reshape2)
+library(plyr)
+library(dplyr)
+library(fdANOVA)
+#library(fdANOVA)
+library(stringr)
+library(ggpubr)
+library(Hmisc)
+# @@ -35,214 +35,220 @@
+library(purrr)
+library(nonlinearTseries)
+library(stringr)
+#answer no if you are using mac 
+# install.packages("ks", dependencies=TRUE)
+# library(ks)
+library(fdANOVA)
+library(splitstackshape)
+```
+
+
+#### SECTION 2 - Force Curve Profile Outcome Variable Creation ----
+#### SECTION 2.1 - DATA wrangling
+
+#These steps create new variables based on the raw force curve data. 
+#The Integrated Mean Square Error (IMSE), also known as the Dispersion Factor (DF) 
+
+```{r}
+#import data files and save them into one table/dataframe 
+
+#import Json files 
+path <- "/Users/jonathanliu/Documents/12.02.21_40'_Data" 
+files <- dir(path, pattern = "*.json",full.names = TRUE)
+#length(files)
+
+```
+#data wrangling: create a new table for the xxx column only 
+```{r}
+map_data <- data.frame(
+  id=integer(), 
+  executed_at=integer(), 
+  workout_interval_number=logical()
+  ,strokes=list()) 
+new_df<- data.frame(
+  workout_interval_id= integer())
+for (i in 1:length(files)){
+  data<-jsonlite::fromJSON(files[i])
+  data<-data.frame(data)
+  map_data<-rbind(map_data,data)
+  subdf<-map_data["workout_intervals.strokes"] #extract the single column that holds the most useful info 
+  df<-subdf[[1]][[i]]
+  new_df<-rbind(new_df,df)
+}
+map_data
+new_id<-map_data[,c("id","workout_intervals.id")]
+new_df<-new_df[,-1] #drop the first empty column
+new_df<- new_df[new_df$stroke_number!=1,]#only after first stroke 
+new_df
+```
+
+
+```{r}
+#load_df<- readRDS(file="RowData.Rda")
+#load_id<-readRDS(file="id_list.Rda")
+#load_df
+#load_id
+#alldf<- rbind(new_df, load_df)
+#all_id<-rbind(new_id, load_id)
+alldf <- new_df
+
+#NOT YET: Discuss needed before update these files. For now, the Rda files contain data from previous data before Dec. 2021
+
+#JL saves all new data into RowData.rda, saves all ids into id_list.Rda
+#saveRDS(alldf,file = "RowData.Rda")
+#saveRDS(all_id,file = "id_list.Rda")
+```
+
+```{r}
+#created a new table that only after 5 stokes
+Middle40min<- alldf[alldf$stroke_number >5,]
+Middle40min
+
+# split curve_data column on a delimiter into multiple columns 
+Middle40min <- cSplit(indt = Middle40min, splitCols = 'curve_data', sep = ',', type.convert = T)
+Middle40min
+```
+
+
+##### SECTION 2.2 - IMSE (DF) Variable Creation ----
+##Disperstion Factor (DF) Variable Creation 
+```{r}
+#1 - Create function that creates the mean of the force values present in the data set, ignoring missing values
+meanna <- function(x){return(mean(x,na.rm=TRUE))}
+
+#2 - Apply the mean of the force values to the Integrated Mean Square Error (Gorecki-Smaga, 2019) 
+# JL IMSE is function for calculating integrated mean square error 
+# JL meanna is function for calculating mean of force values, ignoring missing values
+IMSE <- function(temp_df){
+  #create a temp dataframe including only one person data 
+  #JL %>% passes temp_df to select
+  temp_df<- temp_df%>%select(starts_with("curve_data_")) #get all curve-data columns of one person 
+  #create a temp dataframe that is a matrix with numeric values
+  temp_df<- as.matrix(sapply(temp_df,as.numeric)) #change from character type to numeric 
+  #calculate the mean force across all rowers at each measurement point (2 is the column). This is where meanna is critical because it removes the missing values from the objct. 
+  mean_curve <- apply(temp_df,2,meanna)
+  #Count the number of nonmissing measurements for each stroke
+  sample_size <- apply(!is.na(temp_df),1,sum)
+  #Subtract the mean from each measurement point and square it to create the squared errors
+  squared_errors <- sweep(temp_df,2,mean_curve)^2
+  #replace missing values with 0
+  squared_errors[is.na(squared_errors)] <- 0
+  #calculate the mean squared error of each stroke (this is literally the variance, sigma^2)
+  
+  mse <- apply(squared_errors,1,sum)/sample_size
+  #Output the average of these mean squared errors across all strokes
+  imse<-mean(mse,na.rm=T) 
+  return(list( imse, mse,mean_curve, squared_errors,sample_size)) # the function can't return full values of the temp_df,so temp_df is not in the returned list 
+}
+
+
+#3 - Expand the IMSE values into a new matrix. 
+#get all the unique id 
+id_list<- as.matrix(unique(Middle40min$workout_interval_id))
+IMSE_mat<- data.frame(id_list)
+IMSE_mat<- IMSE_mat%>% rename(workout_id= id_list)
+
+#create an empty place holder for all the values from the "IMSE" function
+IMSE_mat$IMSE <- rep(NA,nrow(IMSE_mat))
+IMSE_mat$MSE<- rep(NA,nrow(IMSE_mat))
+IMSE_mat$MeanCurve<- rep(NA,nrow(IMSE_mat))
+IMSE_mat$SquaredErrors<- rep(NA,nrow(IMSE_mat))
+IMSE_mat$SampleSize<- rep(NA,nrow(IMSE_mat))
+#IMSE_mat
+
+# return all the values from the IMSE function into the matrix 
+for (i in 1:nrow(IMSE_mat)){
+  mse1<- IMSE(Middle40min[Middle40min$workout_interval_id==IMSE_mat[i,"workout_id"],])
+  IMSE_mat[i,"IMSE"]<- mse1[1]
+  IMSE_mat[i,"MSE"]<- list(mse1[2]) #saved the values of variance for each stroke in cells for later use (e.g., plots)
+  IMSE_mat[i,"MeanCurve"]<- list(mse1[3])
+  IMSE_mat[i,"SquaredErrors"]<- list(mse1[4])
+  IMSE_mat[i,"SampleSize"]<- list(mse1[5])
+}
+
+IMSE_mat
+
+#4 - PLOTS 
+#create a matrix of all the curve_data for one person
+temp_df<- Middle40min[Middle40min$workout_interval_id==IMSE_mat[1,"workout_id"],] # id = 2327751
+temp_df<- temp_df%>%select(starts_with("curve_data_")) 
+temp_df<- as.matrix(sapply(temp_df,as.numeric)) 
+
+Indi_mse<- unlist(IMSE_mat[1,"MSE"])
+Indi_mean<-unlist(IMSE_mat[1,"MeanCurve"])
+Indi_sqerr<-unlist(IMSE_mat[1,"SquaredErrors"])
+Indi_sample<-unlist(IMSE_mat[1,"SampleSize"])
+
+matplot(t(temp_df),lty=3,type="l",xlab="Measurement",ylab="Force",xlim=c(0,sum(!is.na(Indi_mean))),ylim=c(0, 600), main="Force Curve, One Person 40 Minutes Rowing")
+lines(Indi_mean,lwd=3,col="yellow")
+legend("topright",legend="mean force curve",lwd=3,col="yellow")
+plot(Indi_mse,type="l",main = " Variance over Strokes, One Person 40 Minutes Rowing",xlab="Strokes", ylab="Variance",)
+```
