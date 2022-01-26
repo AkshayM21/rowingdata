@@ -129,6 +129,7 @@ Middle40min
 ```{r}
 #1 - Create function that creates the mean of the force values present in the data set, ignoring missing values
 meanna <- function(x){return(mean(x,na.rm=TRUE))}
+sumna <- function(x){return(sum(x,na.rm=TRUE))}
 
 #2 - Apply the mean of the force values to the Integrated Mean Square Error (Gorecki-Smaga, 2019) 
 # JL IMSE is function for calculating integrated mean square error 
@@ -140,7 +141,9 @@ IMSE <- function(temp_df){
  #create a temp dataframe that is a matrix with numeric values
  temp_df<- as.matrix(sapply(temp_df,as.numeric)) #change from character type to numeric 
  #calculate the mean force across all rowers at each measurement point (2 is the column). This is where meanna is critical because it removes the missing values from the objct. 
+ print(apply(temp_df,2,sumna))
  mean_curve <- apply(temp_df,2,meanna)
+ print(mean_curve)
  #Count the number of nonmissing measurements for each stroke
  sample_size <- apply(!is.na(temp_df),1,sum)
  #Subtract the mean from each measurement point and square it to create the squared errors
@@ -148,7 +151,6 @@ IMSE <- function(temp_df){
  #replace missing values with 0
  squared_errors[is.na(squared_errors)] <- 0
  #calculate the mean squared error of each stroke (this is literally the variance, sigma^2)
-
  mse <- apply(squared_errors,1,sum)/sample_size
  #Output the average of these mean squared errors across all strokes
  imse<-mean(mse,na.rm=T) 
@@ -196,5 +198,6 @@ Indi_sample<-unlist(IMSE_mat[1,"SampleSize"])
 matplot(t(temp_df),lty=3,type="l",xlab="Measurement",ylab="Force",xlim=c(0,sum(!is.na(Indi_mean))),ylim=c(0, 600), main="Force Curve, One Person 40 Minutes Rowing")
 lines(Indi_mean,lwd=3,col="yellow")
 legend("topright",legend="mean force curve",lwd=3,col="yellow")
+
 plot(Indi_mse,type="l",main = " Variance over Strokes, One Person 40 Minutes Rowing",xlab="Strokes", ylab="Variance",)
 ```

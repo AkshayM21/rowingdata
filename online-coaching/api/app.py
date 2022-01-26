@@ -198,7 +198,6 @@ def parse(df, params):
     avg_energy_per_stroke = energy_per_stroke_sum/count
     avg_500_split = meters_500_split/len(ranges) #since it is only 1 measurement per set of reps, instead of 1 per rep
 
-    imse = graphs(df, ranges, params["name"], workout_id)
 
     past_data_df = get_csv_from_cloud(base_path+params['name']+"/workouts.csv")
   
@@ -218,6 +217,7 @@ def parse(df, params):
         leg_3_avg_power = df["power"][ranges[2][0]:ranges[2][1]].sum(axis=0) / (ranges[2][1] - ranges[2][0])
         leg_3_avg_pulse = df["pulse"][ranges[2][0]:ranges[2][1]].sum(axis=0) / (ranges[2][1] - ranges[2][0])
         decoupling_rate = (leg_3_avg_power/leg_3_avg_pulse - leg_2_avg_power/leg_2_avg_pulse)/(leg_2_avg_power/leg_2_avg_pulse)
+        imse = graphs(df, ranges, params["name"], workout_id)
         output_df = pd.DataFrame(
             {
                 "workout_id":workout_id,
@@ -250,6 +250,7 @@ def parse(df, params):
         #output_df.to_csv(params["output_path"])
         
     else:
+        imse = graphs(df, ranges, params["name"], workout_id)
         output_df = pd.DataFrame(
             {
                 "workout_id":workout_id,
@@ -368,8 +369,9 @@ def graphs(df, valid_intervals, uni, workout_id):
   #RIP elegant 1 line solution
   #curve_datas = [data.split(",") for data in df["curve_data"][interval[0]:interval[1]].values() for interval in valid_intervals]
   curve_datas = []
+  ##valid_intervals[-1] = (valid_intervals[-1][0], valid_intervals[-1][1]-20)
   for interval in valid_intervals:
-    for data in df["curve_data"][interval[0]:interval[1]]:
+    for data in df["curve_data"][interval[0]+5:interval[1]]:
       #handle NaN
       if not pd.isna(data):
         curve_datas.append(list(map(int, data.split(","))))
@@ -391,10 +393,12 @@ def graphs(df, valid_intervals, uni, workout_id):
         temp.append(curve_datas[j][i])
     mean_curve.append(statistics.mean(temp))
   
+  
   #subtract mean from each curve, use to find squared error
   squared_errors = [[pow(curve_datas[i][j]-mean_curve[j], 2) for j in range(len(curve_datas[i]))] for i in range(len(curve_datas))]
 
-  mse = [statistics.mean(data) for data in curve_datas]
+  mse = [statistics.mean(squared_error) for squared_error in squared_errors]
+
 
   imse = statistics.mean(mse)
 
