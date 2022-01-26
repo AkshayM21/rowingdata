@@ -90,6 +90,7 @@ for (i in 1:length(files)){
  new_df<-rbind(new_df,df)
 }
 map_data
+print(map_data)
 new_id<-map_data[,c("id","workout_intervals.id")]
 new_df<-new_df[,-1] #drop the first empty column
 new_df<- new_df[new_df$stroke_number!=1,]#only after first stroke 
@@ -105,6 +106,8 @@ new_df
 #alldf<- rbind(new_df, load_df)
 #all_id<-rbind(new_id, load_id)
 alldf <- new_df
+
+print(alldf)
 
 #NOT YET: Discuss needed before update these files. For now, the Rda files contain data from previous data before Dec. 2021
 
@@ -141,6 +144,9 @@ IMSE <- function(temp_df){
  #create a temp dataframe that is a matrix with numeric values
  temp_df<- as.matrix(sapply(temp_df,as.numeric)) #change from character type to numeric 
  #calculate the mean force across all rowers at each measurement point (2 is the column). This is where meanna is critical because it removes the missing values from the objct. 
+ 
+ print(dim(temp_df))
+ 
  print(apply(temp_df,2,sumna))
  mean_curve <- apply(temp_df,2,meanna)
  print(mean_curve)
