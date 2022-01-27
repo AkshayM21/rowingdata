@@ -35,7 +35,7 @@ function RowerCard(props){
         });      
     })
 
-    if (props.workout["workout_type"] == "decoupling") {
+    if (props.workout["workout_type"] === "decoupling") {
         return(        
             <Card style={{ width: '16rem' }} sx={{ overflow: 'scrollable', position:'relative'}}>
                 <CardContent>
@@ -60,7 +60,7 @@ function RowerCard(props){
                 </CardContent>
             </Card>    
         )
-    } else if (props.workout["workout_type"] == "rp3") {
+    } else if (props.workout["workout_type"] === "rp3") {
         return(        
             <Card style={{ width: '16rem' }} sx={{ overflow: 'scrollable' }}>
                 <CardContent>
