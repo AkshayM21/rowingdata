@@ -26,12 +26,20 @@ function RowerCard(props){
     // For rp3 workouts- show workout_description, rpe, hrTSS (if avg_pulse != 0), stroke rate, stroke length in main
     // For Garmin HR data, show workout_description, rpe, hrTSS
     // For decoupling- show power and heart rate for both pieces, decoupling rate, rpe, hrTSS
+    const[img, setImg] = useState();
+
+    useEffect(() => {
+        fetch(`/graphs?uni=${props.uni}&workout_id=${props.workout["workout_id"]}`).then((response) => response.json())
+        .then(response => {
+            setImg(response.force_profile);
+        });      
+    })
 
     if (props.workout["workout_type"] == "decoupling") {
         return(        
             <Card style={{ width: '16rem' }} sx={{ overflow: 'scrollable', position:'relative'}}>
                 <CardContent>
-                    <Typography sx={{ fontSize: 14 }} color="text.secondary">
+                    <Typography sx={{ fontWeight: 'bold', fontSize: 14 }} color="text.secondary">
                         {props.workout['date']}
                     </Typography>
                     <Typography>
@@ -47,7 +55,7 @@ function RowerCard(props){
                     <Typography sx={{ fontSize: 14 }}>
                         RPE: {props.workout['rpe']}
                     </Typography>
-                    <ForceProfile />
+                    <ForceProfile img={img}/>
                     {/*workout_id=props.workout['workout_id']*/}
                 </CardContent>
             </Card>    
@@ -59,10 +67,10 @@ function RowerCard(props){
                     <Typography sx={{ fontSize: 14 }} color="text.secondary">
                         {props.workout['date']}
                     </Typography>
-                    <Typography>
+                    <Typography sx={{fontWeight: 'bold'}} >
                         Workout: {props.workout['description']}
                     </Typography>
-                    <Typography sx={{ fontSize: 14 }}>
+                    <Typography>
                         Split: {props.workout['avg_500m_time']}s/500m
                     </Typography>
                     <Typography>
@@ -80,7 +88,7 @@ function RowerCard(props){
                     <Typography>
                         RPE: {props.workout['rpe']}
                     </Typography>
-                    <ForceProfile />
+                    <ForceProfile img={img}/>
                     {/*workout_id=props.workout['workout_id']*/}
                 </CardContent>
             </Card>    
@@ -90,7 +98,6 @@ function RowerCard(props){
 
 function Workouts(props) {
     const[progress, setProgress] = useState(0)
-
     /*useEffect(() => {
         const timer = setInterval(()=> {
             if (progress == 100) {
@@ -115,7 +122,7 @@ function Workouts(props) {
                     {props.workouts.map((obj, index) => (
                     // Currently set for 2 cards per column in xs, 4 per column for sm
                     <Grid item xs={6} sm={3} md={3} key={index}>
-                        <RowerCard workout={obj}/>
+                        <RowerCard uni={props.uni} workout={obj}/>
                     </Grid>))}
                 </Grid>              
             </Box>
@@ -178,7 +185,7 @@ function RowerTabs(props) {
 }
 
 function Page(props) {
-    /*const user = useContext(UserContext)
+    const user = useContext(UserContext)
     const [redirect, setredirect] = useState(null)
 
     useEffect(() => {
@@ -187,7 +194,7 @@ function Page(props) {
         }else if(user.isStudent){
             setredirect('/rower_view')
         }
-    }, [user])*/
+    }, [user])
 
     const[uni, setUni] = useState("");
     const[name, setName] = useState();
@@ -212,17 +219,13 @@ function Page(props) {
         .then(response => {
             setResults(response.data);
         });
-
-        /*fetch(`/workouts?uni=${uni}?workout_id=${workouts[workout_id]}`).then((response) => 
-        setImage(response)*/
-        // Maybe move get call to rowercard
-
+        
     }, [uni])
 
 
-    /*if (redirect) {
+    if (redirect) {
         return <Navigate to={redirect}/>
-    }*/
+    }
 
     if (uni === "") {
         return(
