@@ -137,6 +137,20 @@ def rower_list():
   column_order = ['uni', 'name']
   return(dict(df2[column_order].values))
 
+@app.route('/settings', methods=['POST']) 
+def settings():
+  params={'name' : request.form['name'], 'ftp': int(request.form['ftp']),'hr_zone1':int(request.form['hr_zone1']), 'hr_zone2':int(request.form['hr_zone2']), 'hr_zone3': int(request.form['hr_zone3']), 'hr_zone4':int(request.form['hr_zone4']), 'hr_zone5':int(request.form['hr_zone5'])}
+  #params['name']=request.form['name']
+  #params['ftp']=int(request.form['ftp'])
+  #params['hr_zone1']=int(request.form['hr_zone1'])
+  #params['hr_zone2']=int(request.form['hr_zone2'])
+  #params['hr_zone3']=int(request.form['hr_zone3'])
+  #params['hr_zone4']=int(request.form['hr_zone4'])
+  #params['hr_zone5']=int(request.form['hr_zone5'])
+  save_csv_to_cloud(pd.DataFrame(params, index=[0]), base_path+params["name"]+"/settings.csv")
+  return "{}"
+
+
 #page that covers rower's data
 #need to keep track of all parameters we will need
 #need to add post form in submit.html
@@ -150,7 +164,8 @@ def submit():
     params['date'] = request.form['date']
     params['description'] = request.form['description']
     params['rpe'] = int(request.form['rpe'])
-    save_csv_to_cloud(parse(pd.read_csv(request.files['file']), params), base_path+params["name"]+"/workouts.csv")
+    settings=get_csv_from_cloud(base_path+params['name']+"/settings.csv")
+    save_csv_to_cloud(parse(pd.read_csv(request.files['file']), settings, params), base_path+params["name"]+"/workouts.csv")
     return "{}"
     # with open('/CSVs/params.json', 'w') as output:
     #     json.dump(params, output)
@@ -162,16 +177,19 @@ def submit():
 #     open(file_path, 'w').write(file.read())
 
 
+
 # todo: currently, the parse method makes a new csv for each workout -- change to editing 1 csv for each player (by id)
 # note - returns output csv as a pandas dataframe
 # params is a dictionary containing parameters relevant for parsing
 # eg, "workout_type" is a string indicating the type of workout (e.g. decoupling)
 # "on_time" indicates in seconds the lengths of reps (ie, that aren't on break)
 # "name" indicates the ID of the rower
-def parse(df, params):
+def parse(df, settings_df, params):
     #df = pd.read_csv(params["path"])
     workout_id = df["workout_interval_id"][0]
-
+    
+    distance=0
+    #distance=df["distance"][len(df)]
     save_csv_to_cloud(df, base_path+str(params["name"])+"/"+str(workout_id)+"/raw.csv")
 
     ranges = find_valid_ranges(df, params["on_time"])
@@ -182,23 +200,68 @@ def parse(df, params):
     stroke_length_sum = 0
     pulse_sum = 0 #if not connected, pulse sum will remain zero after summing across ranges, so the average will be zero
     energy_per_stroke_sum = 0
-    meters_500_split = 0
+    hrTSS = 0
+    decoupling_rate=0
+    hr_zone1 = settings_df["hr_zone1"][0]
+    hr_zone2 = settings_df["hr_zone2"][0]
+    hr_zone3=settings_df["hr_zone3"][0]
+    hr_zone4=settings_df["hr_zone4"][0]
+    hr_zone5=settings_df["hr_zone5"][0]
+    time_zone1a=0
+    time_zone1b=0
+    time_zone1c=0
+    time_zone2a=0
+    time_zone2b=0
+    time_zone3=0
+    time_zone4=0
+    time_zone5a=0
+    time_zone5b=0
+    time_zone5c=0
+    #meters_500_split = 0
+    #reset time
+    time=0
+      
+    
     for interval in ranges:
         count+=interval[1]-interval[0]
+        time+=df["time"][interval[1]-1]
+        distance+=df["distance"][interval[1]-1]
         power_sum+=df["power"][interval[0]:interval[1]].sum(axis=0)
         stroke_rate_sum+=df["stroke_rate"][interval[0]:interval[1]].sum(axis=0)
         stroke_length_sum+=df["stroke_length"][interval[0]:interval[1]].sum(axis=0)
         pulse_sum+=df["pulse"][interval[0]:interval[1]].sum(axis=0)
         energy_per_stroke_sum+=df["energy_per_stroke"][interval[0]:interval[1]].sum(axis=0)
-        meters_500_split+=df["estimated_500m_time"][interval[1]-1]
+        for i in range(interval[0]+1, interval[1]-1):
+          if (df["pulse"][i] == 0):
+            break
+          elif (df["pulse"][i] < 2*hr_zone1/3):
+            hrTSS += (df["time"][i] - df["time"][i-1])*20/(3600)
+          elif (df["pulse"][i] < 5*hr_zone1/6):
+            hrTSS += (df["time"][i] - df["time"][i-1])*30/(3600)
+          elif (df["pulse"][i] < hr_zone1):
+            hrTSS += (df["time"][i] - df["time"][i-1])*40/(3600)
+          elif (df["pulse"][i] < hr_zone1+(hr_zone2-hr_zone1)/2):
+            hrTSS += (df["time"][i] - df["time"][i-1])*50/(3600)
+          elif (df["pulse"][i] < hr_zone2):
+            hrTSS += (df["time"][i] - df["time"][i-1])*60/(3600)
+          elif (df["pulse"][i] < hr_zone3):
+            hrTSS += (df["time"][i] - df["time"][i-1])*70/(3600)
+          elif (df["pulse"][i] < hr_zone4):
+            hrTSS += (df["time"][i] - df["time"][i-1])*80/(3600)
+          elif (df["pulse"][i] < hr_zone4+(hr_zone5-hr_zone4)/3):
+            hrTSS += (df["time"][i] - df["time"][i-1])*100/(3600)
+          elif (df["pulse"][i] < hr_zone4+(2*hr_zone5-hr_zone4)/3):
+            hrTSS += (df["time"][i] - df["time"][i-1])*120/(3600)
+          elif (df["pulse"][i] < hr_zone5):
+            hrTSS += (df["time"][i] - df["time"][i-1])*140/(3600)
+        #meters_500_split+=df["estimated_500m_time"][interval[1]-1]
     avg_power = power_sum/count
     avg_stroke_rate = stroke_rate_sum/count
     avg_stroke_length = stroke_length_sum/count
     avg_pulse = pulse_sum/count
     avg_energy_per_stroke = energy_per_stroke_sum/count
-    avg_500_split = meters_500_split/len(ranges) #since it is only 1 measurement per set of reps, instead of 1 per rep
-
-
+    avg_500_split = time/distance*500
+    #meters_500_split/len(ranges) #since it is only 1 measurement per set of reps, instead of 1 per rep
     past_data_df = get_csv_from_cloud(base_path+params['name']+"/workouts.csv")
   
     if(not past_data_df.empty):
@@ -216,7 +279,11 @@ def parse(df, params):
         leg_2_avg_pulse = df["pulse"][ranges[1][0]:ranges[1][1]].sum(axis=0) / (ranges[1][1] - ranges[1][0])
         leg_3_avg_power = df["power"][ranges[2][0]:ranges[2][1]].sum(axis=0) / (ranges[2][1] - ranges[2][0])
         leg_3_avg_pulse = df["pulse"][ranges[2][0]:ranges[2][1]].sum(axis=0) / (ranges[2][1] - ranges[2][0])
-        decoupling_rate = (leg_3_avg_power/leg_3_avg_pulse - leg_2_avg_power/leg_2_avg_pulse)/(leg_2_avg_power/leg_2_avg_pulse)
+        if (avg_pulse != 0 ):
+          decoupling_rate = (leg_3_avg_power/leg_3_avg_pulse - leg_2_avg_power/leg_2_avg_pulse)/(leg_2_avg_power/leg_2_avg_pulse)
+        else:
+          decoupling_rate = 0
+
         imse = graphs(df, ranges, params["name"], workout_id)
         output_df = pd.DataFrame(
             {
@@ -237,7 +304,7 @@ def parse(df, params):
                 "description":params['description'],
                 "imse":imse,
                 "tss":"",
-                "hrtss":"",
+                "hrtss":hrTSS,
                 "ets":"",
                 "metric1":"",
                 "metric2":"",
@@ -270,7 +337,7 @@ def parse(df, params):
                 "description":params['description'],
                 "imse": imse,
                 "tss":"",
-                "hrtss":"",
+                "hrtss":hrTSS,
                 "ets":"",
                 "metric1":"",
                 "metric2":"",
@@ -317,8 +384,8 @@ def get_workouts(uni):
       "avg_stroke_length": round(row[6],1),
       "avg_pulse": round(row[7], 2),
       "avg_energy_per_stroke": round(row[8],2),
-      "avg_500m_time": row[9],
-      "leg_2_avg_power": round(row[10], 2) if not pd.isnull(row[10]) else "",
+      "avg_500m_time": round(row[9],2),
+      "leg_2_avg_power": round(row[10],2) if not pd.isnull(row[10]) else "",
       "leg_2_avg_pulse": round(row[11],2) if not pd.isnull(row[11]) else "",
       "leg_3_avg_power": round(row[12],2) if not pd.isnull(row[10]) else "",
       "leg_3_avg_pulse": round(row[13],2) if not pd.isnull(row[11]) else "",
@@ -327,7 +394,7 @@ def get_workouts(uni):
       "description": row[16],
       "imse": round(row[17],2),
       "tss":"",
-      "hrtss":"",
+      "hrtss":round(row[19], 2),
       "ets":"",
       "metric1":"",
       "metric2":"",
