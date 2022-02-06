@@ -3,6 +3,20 @@
   display: flex;
   flex-flow: column;
   height: 100%;
+  font-family:'Gotham';
+}
+
+body {
+  background: url(boathouse.png) repeat 0 0;
+  background-size:100%
+}
+
+.App .sors {
+  background-color: white;
+}
+
+.App .coach_view h1 {
+  font-family:'Roboto';
 }
 
 .App .header {
@@ -13,9 +27,17 @@
   flex: 1 1 auto;
 }
 
+.App .empty-workouts {
+  margin-right: 25%;
+}
+
 .App-logo {
   height: 40vmin;
   pointer-events: none;
+}
+
+.login-image img {
+  background-color: 'transparent';
 }
 
 @media (prefers-reduced-motion: no-preference) {
@@ -47,5 +69,3 @@
     transform: rotate(360deg);
   }
 }
-
-
