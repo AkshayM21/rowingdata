@@ -31,7 +31,7 @@ export default function Login() {
   
   return (
       <div style={divStyle} className="login-buttons">
-        <GoogleButton className="login-provider-button" onClick={signInWithGoogle} />
+        <button className="login-provider-button"><img className="login-image" src="lion.png" alt="Login" background='transparent' onClick={signInWithGoogle} width = '300' height = '300'/></button>
       </div>
   );
 }
