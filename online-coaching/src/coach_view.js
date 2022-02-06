@@ -27,22 +27,27 @@ function RowerCard(props){
     // For Garmin HR data, show workout_description, rpe, hrTSS
     // For decoupling- show power and heart rate for both pieces, decoupling rate, rpe, hrTSS
     const[img, setImg] = useState();
+    const[variance, setVariance] = useState();
 
     useEffect(() => {
         fetch(`/graphs?uni=${props.uni}&workout_id=${props.workout["workout_id"]}`).then((response) => response.json())
         .then(response => {
             setImg(response.force_profile);
+            setVariance(response.stroke_variance);
         });      
     })
+
+    var seconds = Math.round(props.workout['avg_500m_time'] % 60*100)/100;
+    var minutes = Math.floor(props.workout['avg_500m_time']/60);           
 
     if (props.workout["workout_type"] === "decoupling") {
         return(        
             <Card style={{ width: '16rem' }} sx={{ overflow: 'scrollable', position:'relative'}}>
                 <CardContent>
-                    <Typography sx={{ fontWeight: 'bold', fontSize: 14 }} color="text.secondary">
+                    <Typography sx={{ fontSize: 14 }} color="text.secondary">
                         {props.workout['date']}
                     </Typography>
-                    <Typography>
+                    <Typography sx={{fontWeight: 'bold'}}>
                         Decoupling Workout
                     </Typography>
                     <Typography sx={{ float:'left'}}>
@@ -52,17 +57,19 @@ function RowerCard(props){
                     <Typography>
                         HR Pieces 2-3: ({props.workout["leg_2_avg_pulse"]}, {props.workout["leg_3_avg_pulse"]})
                     </Typography>
+                    <Typography>
+                        hrTSS: {props.workout['hrtss']}
+                    </Typography>
                     <Typography sx={{ fontSize: 14 }}>
                         RPE: {props.workout['rpe']}
                     </Typography>
-                    <ForceProfile img={img}/>
-                    {/*workout_id=props.workout['workout_id']*/}
+                    <ForceProfile variance={variance} img={img} imse={props.workout["imse"]}/>
                 </CardContent>
             </Card>    
         )
     } else if (props.workout["workout_type"] === "rp3") {
         return(        
-            <Card style={{ width: '16rem' }} sx={{ overflow: 'scrollable' }}>
+            <Card style={{ width: '16rem' }} sx={{ overflow: 'scrollable' }} >
                 <CardContent>
                     <Typography sx={{ fontSize: 14 }} color="text.secondary">
                         {props.workout['date']}
@@ -71,7 +78,7 @@ function RowerCard(props){
                         Workout: {props.workout['description']}
                     </Typography>
                     <Typography>
-                        Split: {props.workout['avg_500m_time']}s/500m
+                        Split: {minutes}:{seconds} /500m
                     </Typography>
                     <Typography>
                         Average Power: {props.workout['avg_power']} Watts
@@ -86,9 +93,12 @@ function RowerCard(props){
                         Energy per Stroke: {props.workout['avg_energy_per_stroke']} J
                     </Typography>
                     <Typography>
+                        hrTSS: {props.workout['hrtss']}
+                    </Typography>
+                    <Typography>
                         RPE: {props.workout['rpe']}
                     </Typography>
-                    <ForceProfile img={img}/>
+                    <ForceProfile img={img} variance={variance} imse={props.workout["imse"]}/>
                     {/*workout_id=props.workout['workout_id']*/}
                 </CardContent>
             </Card>    
@@ -97,28 +107,13 @@ function RowerCard(props){
 }
 
 function Workouts(props) {
-    const[progress, setProgress] = useState(0)
-    /*useEffect(() => {
-        const timer = setInterval(()=> {
-            if (progress == 100) {
-                clearInterval(timer);
-            } else {
-                setProgress((progress) => progress >= 100 ? 0 : progress + 10);
-            }  
-        }, 500);
-
-        return( () => {
-            clearInterval(timer);
-        });
-    }, []);*/
 
     if (props.workouts.length === 0) {
-        return(<h1>No Workouts Submitted</h1>)
+        return(<h1 className='empty-workouts'>No Workouts Submitted</h1>)
     } else {
         return(
             <Box>
-                <CircularProgress id='progress' variant='determinate' value = {progress}/>
-                <Grid style={{width: '1200px'}} container spacing={{ xs: 2, sm: 3, md: 3}} aria-busy={true} aria-describedby='progress'>
+                <Grid style={{width: '100%'}} container spacing={{ xs: 2, sm: 3, md: 3}} aria-busy={true} aria-describedby='progress'>
                     {props.workouts.map((obj, index) => (
                     // Currently set for 2 cards per column in xs, 4 per column for sm
                     <Grid item xs={6} sm={3} md={3} key={index}>
@@ -149,19 +144,30 @@ function SorS(props) {
     ]
 
     return (
-        <div style={{ height: 300, width: '110%' }}>
-            <DataGrid rows={rows} columns={columns} />
-        </div>
+        <Box className='sors' style={{ borderRadius: '10px', height: 500, width: '95%'}}>
+            <DataGrid style={{ borderRadius: '10px'}} rows={rows} columns={columns} />
+        </Box>
     );
 }
 
 
 function RowerTabs(props) {
     const [value, setValue] = React.useState('1');
+    /*const [loading, setLoading] = React.useState(false);
+    const [success, setSuccess] = React.useState(false);*/
 
     const handleChange = (event, newValue) => {
         setValue(newValue);
     };
+
+    /*const handleClick = () => {
+        setSuccess(false);
+        setLoading(true);
+        timer.current = window.setTimeout(() => {
+            setSuccess(true);
+            setLoading(false);
+        }, 3000);
+    };*/
 
     return (
         <Box sx={{ flexGrow: 1, p: 3, ml: { sm: `${drawerWidth}px` }, width: { sm: `calc(100% - ${drawerWidth}px)` }, overflow: 'scrollable' }}>
@@ -172,9 +178,9 @@ function RowerTabs(props) {
                         <Tab label="SorS" value="2"/>
                     </TabList>
                 </Box>
-                <TabPanel value="1">
-                    <Workouts workouts= {props.workouts} uni={props.uni} loading={props.loading}/>
-                </TabPanel>
+                {props.success? <TabPanel value="1">
+                    <Workouts workouts= {props.workouts} uni={props.uni}/>
+                </TabPanel> : <CircularProgress/>}
                 <TabPanel value="2">
                     <SorS results= {props.results} uni={props.uni}/>
                 </TabPanel>
@@ -188,6 +194,9 @@ function Page(props) {
     const user = useContext(UserContext)
     const [redirect, setredirect] = useState(null)
 
+    const [loading, setLoading] = React.useState(false);
+    const [success, setSuccess] = React.useState(false);
+
     useEffect(() => {
         if (!user) {
             setredirect('/')
@@ -200,15 +209,22 @@ function Page(props) {
     const[name, setName] = useState();
     const[workouts, setWorkouts]= useState([]);
     const[results, setResults] = useState([]); 
-    const[loading, setLoading] = useState(false);
+    const timer = React.useRef();
+    
 
     const changeName = (newUni, newName) => {
         setUni(newUni);
         setName(newName);
+
+        setSuccess(false);
+        setLoading(true);
+        timer.current = window.setTimeout(() => {
+            setSuccess(true);
+            setLoading(false);
+        }, 250);
     }
 
     useEffect(() => {
-        setLoading(true);
         fetch(`/workouts?uni=${uni}`).then((response) => response.json())
         .then(response => {
             setWorkouts(response.data);
@@ -236,10 +252,10 @@ function Page(props) {
         )
     } else {
         return(
-            <div>
+            <div className='coach_view'>
                 <RowerMenu onClick={changeName} />
                 <h1>{name} Profile</h1>
-                <RowerTabs results= {results} workouts={workouts} uni={uni} name={name} loading={loading}/>
+                <RowerTabs results= {results} workouts={workouts} uni={uni} name={name} loading={loading} success={success}/>
             </div>
         )
     }
