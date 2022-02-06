@@ -1,6 +1,7 @@
 import React, {Component} from "react"
 import moment from 'moment'
 import AdapterMoment from '@mui/lab/AdapterMoment';
+import AdapterDateFns from '@mui/lab/AdapterDateFns';
 import LocalizationProvider from '@mui/lab/LocalizationProvider';
 import DateTimePicker from "@mui/lab/DateTimePicker";
 import TimePicker from "@mui/lab/TimePicker";
@@ -71,7 +72,7 @@ class SubmissionForm extends Component{
         }
     
         this.setState({snackBarOpen: false})
-      };
+    };
 
     handleSubmit(e) {
         e.preventDefault();
@@ -188,7 +189,7 @@ class SubmissionForm extends Component{
           );
         return(
             <div>
-            <Paper elevation={3} style={{width: '50%', margin: "0 auto"}} >
+            <Paper elevation={3} style={{width: '50%', margin: "0 auto", borderRadius: 10}} >
                 <Typography style={{marginTop: "25px"}} variant="h6" gutterBottom component="div">
                     Submit Workout Data
                 </Typography>
@@ -206,7 +207,7 @@ class SubmissionForm extends Component{
                             />
                         </Grid>
                         <Grid item>
-                            <LocalizationProvider dateAdapter={AdapterMoment}>
+                            <LocalizationProvider dateAdapter={AdapterDateFns}>
                                 <DateTimePicker
                                     renderInput={(props) => <TextField {...props} />}
                                     label="Workout Date"
@@ -225,8 +226,8 @@ class SubmissionForm extends Component{
                                     openTo="minutes"
                                     views={["minutes", "seconds"]}
                                     inputFormat="mm:ss"
-                                    label="Split Time"
-                                    emptyLabel="Split Time"
+                                    label="Piece Time"
+                                    emptyLabel="Piece Time"
                                     value={this.state.time_on}
                                     onChange={this.handleTimeChange}
                                 />
