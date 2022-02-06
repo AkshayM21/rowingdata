@@ -1,4 +1,3 @@
-
 import './App.css';
 import React from 'react';
 import Login from './Pages/AuthenticationPage';
@@ -8,6 +7,7 @@ import UserProvider from "./providers/UserProvider";
 import Base from './Base'
 import Rower from "./rower_view"
 import Page from "./coach_view"
+import Zones from "./zones"
 import {Header} from "./Header"
 
 
@@ -24,6 +24,7 @@ function App() {
           <Route path="/" element={<Login />} />
           <Route path="/rower_view" element={<Rower/>} />
           <Route path="/coach_view" element={<Page/>} />
+          <Route path="/settings" element={<Zones/>} />
         </Routes>
     </div>
     </Router>
@@ -31,8 +32,6 @@ function App() {
     </div>
   );
 }
-
-
 
 
 export default App;
