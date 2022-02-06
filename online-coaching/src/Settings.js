@@ -202,7 +202,7 @@ class Settings extends Component {
         );
         return(
             <div>
-            <Paper elevation={3} style={{width: '50%', margin: "0 auto"}} >
+            <Paper elevation={3} style={{width: '50%', margin: "0 auto", borderRadius: 10}} >
                 <Typography style={{marginTop: "25px"}} variant="h6" gutterBottom component="div">
                     Set Training Zones
                 </Typography>
