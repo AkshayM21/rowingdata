@@ -1,16 +1,20 @@
 import { AppBar, Toolbar, Typography, Button} from "@mui/material";
 import {makeStyles} from "@mui/styles"
+import { Navigate } from "react-router-dom";
 import React, {useState, useEffect, useContext} from "react";
-import {logOut} from "./services/firebase"
+import {logOut} from "./services/firebase";
 import { UserContext } from './providers/UserProvider';
+import { normalizeUnits } from "moment";
 
 
 export function Header() {
 
-  const {header, logo, button, toolbar} = useStyles();
+  const {header, logo, button, hidden, toolbar} = useStyles();
 
   const user = useContext(UserContext)
   const [loggedin, setloggedin] = useState(false)
+  const [redirect, setredirect] = useState(null)
+  const [back, setback] = useState(false)
 
   useEffect(() => {
     if (user) {
@@ -18,19 +22,47 @@ export function Header() {
     }else{
       setloggedin(false)
     }
+    if (redirect == '/settings'){
+      setback(true);
+    } else if (redirect == '/rower_view'){
+      setback(false);
+    }
   }, [user])
 
-
   const PageName = (
-    <Typography variant="h6" component="h1" className={logo}>
-      C150 Training Statistics
-    </Typography>
+    <div>
+      <Typography variant="h6" component="h1" className={logo}>
+        C150 Training Statistics
+      </Typography>
+    </div>
   );
+
+  const handleClick = () => {
+    setredirect('/settings');
+    setback('true');
+
+  }
+
+  const handleBackClick = () => {
+    setredirect('/rower_view');
+    setback('false');
+  }
   
   const LogoutButton = (
     <Button variant="contained" className={button} onClick={logOut}>Logout</Button>
   );
 
+  const Settings = (
+    <Button variant="contained" className={back? hidden: button} onClick={handleClick}>Settings</Button>
+  );
+
+  const Back = (
+    <Button variant="contained" className={back? button: hidden} onClick={handleBackClick}>Back</Button>
+  );
+
+  if (redirect) {
+      return <Navigate to={redirect}/>
+  }
 
   const displayDesktop = () => {
     if(!loggedin){
@@ -40,6 +72,8 @@ export function Header() {
     }else{
         return (<Toolbar className={toolbar}>
             {PageName}
+            {!back && Settings}
+            {back && Back}
             {LogoutButton}
             </Toolbar>);
     }
@@ -69,7 +103,14 @@ const useStyles = makeStyles({
         fontWeight: 700,
         color: "#FFFEFE",
         size: "18px",
-        marginLeft: "38px",
+        marginLeft: "0px",
+        paddingLeft: 0,
+      },
+    settings: {
+        marginLeft: "100%",
+      },
+    hidden: {
+        dislplay: 'none',
       },
     toolbar: {
         display: "flex",
