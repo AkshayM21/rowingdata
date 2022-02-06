@@ -178,9 +178,9 @@ function RowerTabs(props) {
                         <Tab label="SorS" value="2"/>
                     </TabList>
                 </Box>
-                {props.success? <TabPanel value="1">
+                <TabPanel value="1">
                     <Workouts workouts= {props.workouts} uni={props.uni}/>
-                </TabPanel> : <CircularProgress/>}
+                </TabPanel> 
                 <TabPanel value="2">
                     <SorS results= {props.results} uni={props.uni}/>
                 </TabPanel>
@@ -228,7 +228,6 @@ function Page(props) {
         fetch(`/workouts?uni=${uni}`).then((response) => response.json())
         .then(response => {
             setWorkouts(response.data);
-            setLoading(false);
         });
 
         fetch(`/sors?uni=${uni}`).then((response) => response.json())

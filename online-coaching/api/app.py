@@ -459,7 +459,6 @@ def graphs(df, valid_intervals, uni, workout_id):
         temp.append(curve_datas[j][i])
     mean_curve.append(statistics.mean(temp))
   
-  
   #subtract mean from each curve, use to find squared error
   squared_errors = [[pow(curve_datas[i][j]-mean_curve[j], 2) for j in range(len(curve_datas[i]))] for i in range(len(curve_datas))]
 
@@ -471,6 +470,7 @@ def graphs(df, valid_intervals, uni, workout_id):
   #plot force profile graph
 
   plt.figure(1)
+  plt.clf()
   for curve_data in curve_datas:
     plt.plot(curve_data, linestyle="dashed", label="_nolegend_")
   plt.plot(mean_curve, label="mean force curve", color="yellow")
@@ -488,6 +488,7 @@ def graphs(df, valid_intervals, uni, workout_id):
 
   #plot variance graph
   plt.figure(2)
+  plt.clf()
   plt.plot(mse, color="black")
   plt.title("Variance over Strokes")
   plt.xlabel("Strokes")
