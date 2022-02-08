@@ -140,13 +140,6 @@ def rower_list():
 @app.route('/settings', methods=['POST']) 
 def settings():
   params={'name' : request.form['name'], 'ftp': int(request.form['ftp']),'hr_zone1':int(request.form['hr_zone1']), 'hr_zone2':int(request.form['hr_zone2']), 'hr_zone3': int(request.form['hr_zone3']), 'hr_zone4':int(request.form['hr_zone4']), 'hr_zone5':int(request.form['hr_zone5'])}
-  #params['name']=request.form['name']
-  #params['ftp']=int(request.form['ftp'])
-  #params['hr_zone1']=int(request.form['hr_zone1'])
-  #params['hr_zone2']=int(request.form['hr_zone2'])
-  #params['hr_zone3']=int(request.form['hr_zone3'])
-  #params['hr_zone4']=int(request.form['hr_zone4'])
-  #params['hr_zone5']=int(request.form['hr_zone5'])
   save_csv_to_cloud(pd.DataFrame(params, index=[0]), base_path+params["name"]+"/settings.csv")
   return "{}"
 
@@ -202,21 +195,12 @@ def parse(df, settings_df, params):
     energy_per_stroke_sum = 0
     hrTSS = 0
     decoupling_rate=0
-    hr_zone1 = settings_df["hr_zone1"][0]
-    hr_zone2 = settings_df["hr_zone2"][0]
-    hr_zone3=settings_df["hr_zone3"][0]
-    hr_zone4=settings_df["hr_zone4"][0]
-    hr_zone5=settings_df["hr_zone5"][0]
-    time_zone1a=0
-    time_zone1b=0
-    time_zone1c=0
-    time_zone2a=0
-    time_zone2b=0
-    time_zone3=0
-    time_zone4=0
-    time_zone5a=0
-    time_zone5b=0
-    time_zone5c=0
+    if (settings_df["hr_zone2"][0]!=0 and settings_df["hr_zone3"][0]!=0 and settings_df["hr_zone4"][0]!=0 and settings_df["hr_zone5"][0]!=0):
+        hr_zone1 = settings_df["hr_zone1"][0]
+        hr_zone2 = settings_df["hr_zone2"][0]
+        hr_zone3=settings_df["hr_zone3"][0]
+        hr_zone4=settings_df["hr_zone4"][0]
+        hr_zone5=settings_df["hr_zone5"][0]
     #meters_500_split = 0
     #reset time
     time=0
@@ -232,28 +216,29 @@ def parse(df, settings_df, params):
         pulse_sum+=df["pulse"][interval[0]:interval[1]].sum(axis=0)
         energy_per_stroke_sum+=df["energy_per_stroke"][interval[0]:interval[1]].sum(axis=0)
         for i in range(interval[0]+1, interval[1]-1):
-          if (df["pulse"][i] == 0):
-            break
-          elif (df["pulse"][i] < 2*hr_zone1/3):
-            hrTSS += (df["time"][i] - df["time"][i-1])*20/(3600)
-          elif (df["pulse"][i] < 5*hr_zone1/6):
-            hrTSS += (df["time"][i] - df["time"][i-1])*30/(3600)
-          elif (df["pulse"][i] < hr_zone1):
-            hrTSS += (df["time"][i] - df["time"][i-1])*40/(3600)
-          elif (df["pulse"][i] < hr_zone1+(hr_zone2-hr_zone1)/2):
-            hrTSS += (df["time"][i] - df["time"][i-1])*50/(3600)
-          elif (df["pulse"][i] < hr_zone2):
-            hrTSS += (df["time"][i] - df["time"][i-1])*60/(3600)
-          elif (df["pulse"][i] < hr_zone3):
-            hrTSS += (df["time"][i] - df["time"][i-1])*70/(3600)
-          elif (df["pulse"][i] < hr_zone4):
-            hrTSS += (df["time"][i] - df["time"][i-1])*80/(3600)
-          elif (df["pulse"][i] < hr_zone4+(hr_zone5-hr_zone4)/3):
-            hrTSS += (df["time"][i] - df["time"][i-1])*100/(3600)
-          elif (df["pulse"][i] < hr_zone4+(2*hr_zone5-hr_zone4)/3):
-            hrTSS += (df["time"][i] - df["time"][i-1])*120/(3600)
-          elif (df["pulse"][i] < hr_zone5):
-            hrTSS += (df["time"][i] - df["time"][i-1])*140/(3600)
+            if (settings_df["hr_zone2"][0]!=0 and settings_df["hr_zone3"][0]!=0 and settings_df["hr_zone4"][0]!=0 and settings_df["hr_zone5"][0]!=0):
+                  if (df["pulse"][i] == 0):
+                    break
+                  elif (df["pulse"][i] < 2*hr_zone1/3):
+                    hrTSS += (df["time"][i] - df["time"][i-1])*20/(3600)
+                  elif (df["pulse"][i] < 5*hr_zone1/6):
+                    hrTSS += (df["time"][i] - df["time"][i-1])*30/(3600)
+                  elif (df["pulse"][i] < hr_zone1):
+                    hrTSS += (df["time"][i] - df["time"][i-1])*40/(3600)
+                  elif (df["pulse"][i] < hr_zone1+(hr_zone2-hr_zone1)/2):
+                    hrTSS += (df["time"][i] - df["time"][i-1])*50/(3600)
+                  elif (df["pulse"][i] < hr_zone2):
+                    hrTSS += (df["time"][i] - df["time"][i-1])*60/(3600)
+                  elif (df["pulse"][i] < hr_zone3):
+                    hrTSS += (df["time"][i] - df["time"][i-1])*70/(3600)
+                  elif (df["pulse"][i] < hr_zone4):
+                    hrTSS += (df["time"][i] - df["time"][i-1])*80/(3600)
+                  elif (df["pulse"][i] < hr_zone4+(hr_zone5-hr_zone4)/3):
+                    hrTSS += (df["time"][i] - df["time"][i-1])*100/(3600)
+                  elif (df["pulse"][i] < hr_zone4+(2*hr_zone5-hr_zone4)/3):
+                    hrTSS += (df["time"][i] - df["time"][i-1])*120/(3600)
+                  elif (df["pulse"][i] < hr_zone5):
+                    hrTSS += (df["time"][i] - df["time"][i-1])*140/(3600)
         #meters_500_split+=df["estimated_500m_time"][interval[1]-1]
     avg_power = power_sum/count
     avg_stroke_rate = stroke_rate_sum/count
