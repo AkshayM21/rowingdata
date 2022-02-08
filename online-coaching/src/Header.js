@@ -22,11 +22,6 @@ export function Header() {
     }else{
       setloggedin(false)
     }
-    if (redirect == '/settings'){
-      setback(true);
-    } else if (redirect == '/rower_view'){
-      setback(false);
-    }
   }, [user])
 
   const PageName = (
@@ -37,27 +32,9 @@ export function Header() {
     </div>
   );
 
-  const handleClick = () => {
-    setredirect('/settings');
-    setback('true');
-
-  }
-
-  const handleBackClick = () => {
-    setredirect('/rower_view');
-    setback('false');
-  }
   
   const LogoutButton = (
     <Button variant="contained" className={button} onClick={logOut}>Logout</Button>
-  );
-
-  const Settings = (
-    <Button variant="contained" className={back? hidden: button} onClick={handleClick}>Settings</Button>
-  );
-
-  const Back = (
-    <Button variant="contained" className={back? button: hidden} onClick={handleBackClick}>Back</Button>
   );
 
   if (redirect) {
@@ -72,8 +49,6 @@ export function Header() {
     }else{
         return (<Toolbar className={toolbar}>
             {PageName}
-            {!back && Settings}
-            {back && Back}
             {LogoutButton}
             </Toolbar>);
     }
@@ -103,7 +78,7 @@ const useStyles = makeStyles({
         fontWeight: 700,
         color: "#FFFEFE",
         size: "18px",
-        marginLeft: "0px",
+        marginLeft: "60px",
         paddingLeft: 0,
       },
     settings: {
