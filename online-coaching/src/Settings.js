@@ -1,4 +1,4 @@
-import React, {Component} from "react"
+import React, {Component} from "react";
 import Typography from "@mui/material/Typography";
 import Grid from "@mui/material/Grid";
 import TextField from "@mui/material/TextField";
@@ -33,7 +33,7 @@ class Settings extends Component {
         this.handleZone3Change=this.handleZone3Change.bind(this);
         this.handleZone4Change=this.handleZone4Change.bind(this);
         this.handleZone5Change=this.handleZone5Change.bind(this);
-        this.handleSubmit = this.handleSubmit.bind(this)
+        this.handleSubmit = this.handleSubmit.bind(this);
 
         fetch("/rowers")
         .then((result) => result.json())
@@ -202,10 +202,6 @@ class Settings extends Component {
         );
         return(
             <div>
-            <Paper elevation={3} style={{width: '50%', margin: "0 auto", borderRadius: 10}} >
-                <Typography style={{marginTop: "25px"}} variant="h6" gutterBottom component="div">
-                    Set Training Zones
-                </Typography>
                 <form id="settings-form" onSubmit={this.handleSubmit}>
                     <Grid container rowSpacing={2} alignItems="center" justifyContent="space-around" direction="column">
                         <Grid item>
@@ -223,7 +219,7 @@ class Settings extends Component {
                             <TextField
                                 id="ftp"
                                 name="ftp"
-                                label="Functional Threshold Power"
+                                label="FTP"
                                 type="text"
                                 value={this.state.ftp}
                                 onChange={this.handleFTPChange}
@@ -279,19 +275,18 @@ class Settings extends Component {
                                 onChange={this.handleZone5Change}
                             />
                         </Grid>                      
-                        <Grid item sx={{marginBottom: "10px"}}>
+                        <Grid item sx={{marginBottom: "15px"}}>
                             <Button disabled={!submittable} variant="contained" type="submit">Submit</ Button>
                         </Grid>
                     </Grid>
                 </form>
-            </Paper>
-            <Snackbar
-                open={this.state.snackBarOpen}
-                autoHideDuration={6000}
-                onClose={this.handleClose}
-                message="Settings Updated!"
-                action={action}
-            />
+                <Snackbar
+                    open={this.state.snackBarOpen}
+                    autoHideDuration={6000}
+                    onClose={this.handleClose}
+                    message="Settings Updated!"
+                    action={action}
+                />
             </div>
         )
     }
