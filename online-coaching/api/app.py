@@ -264,10 +264,13 @@ def parse(df, settings_df, params):
         leg_2_avg_pulse = df["pulse"][ranges[1][0]:ranges[1][1]].sum(axis=0) / (ranges[1][1] - ranges[1][0])
         leg_3_avg_power = df["power"][ranges[2][0]:ranges[2][1]].sum(axis=0) / (ranges[2][1] - ranges[2][0])
         leg_3_avg_pulse = df["pulse"][ranges[2][0]:ranges[2][1]].sum(axis=0) / (ranges[2][1] - ranges[2][0])
-        if (avg_pulse != 0 ):
+
+        if avg_pulse != 0:
           decoupling_rate = (leg_3_avg_power/leg_3_avg_pulse - leg_2_avg_power/leg_2_avg_pulse)/(leg_2_avg_power/leg_2_avg_pulse)
         else:
           decoupling_rate = 0
+          leg_2_avg_pulse = "N/A"
+          leg_3_avg_pulse = "N/A"
 
         imse = graphs(df, ranges, params["name"], workout_id)
         output_df = pd.DataFrame(
