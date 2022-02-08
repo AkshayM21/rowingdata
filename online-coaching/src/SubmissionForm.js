@@ -164,8 +164,14 @@ class SubmissionForm extends Component{
     }
 
     handleFileChange(e){
-        this.setState({file: e.target.files[0]})
-        this.setState({isFilePicked: true})
+        if(e.target.files[0]){
+            this.setState({file: e.target.files[0]})
+            this.setState({isFilePicked: true})
+        }else{
+            this.setState({file: ""})
+            this.setState({isFilePicked: false})
+        }
+        
 
     }
 
