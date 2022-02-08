@@ -111,8 +111,8 @@ def workouts():
 @app.route("/graphs", methods=['GET'])
 def graphs():
   return { 
-    "force_profile": str(base64.b64encode(get_png_from_cloud(base_path+request.args.get('uni')+"/"+str(request.args.get('workout_id'))+"/ForceProfile.png")))[2:-2],
-    "stroke_variance": str(base64.b64encode(get_png_from_cloud(base_path+request.args.get('uni')+"/"+str(request.args.get('workout_id'))+"/StrokeVariance.png")))[2:-2]
+    "force_profile": str(base64.b64encode(get_png_from_cloud(base_path+request.args.get('uni')+"/"+str(request.args.get('workout_id'))+"/ForceProfile.png")))[2:-1],
+    "stroke_variance": str(base64.b64encode(get_png_from_cloud(base_path+request.args.get('uni')+"/"+str(request.args.get('workout_id'))+"/StrokeVariance.png")))[2:-1]
   }
   
 
