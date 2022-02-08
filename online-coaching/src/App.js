@@ -24,7 +24,6 @@ function App() {
           <Route path="/" element={<Login />} />
           <Route path="/rower_view" element={<Rower/>} />
           <Route path="/coach_view" element={<Page/>} />
-          <Route path="/settings" element={<Zones/>} />
         </Routes>
     </div>
     </Router>
