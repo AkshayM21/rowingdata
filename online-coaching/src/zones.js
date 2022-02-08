@@ -1,27 +1,61 @@
-import React, {useState, useEffect, useContext} from "react";
-import {UserContext} from "./providers/UserProvider";
-import { Button } from "@mui/material";
-import { Navigate } from 'react-router-dom';
-import Settings from "./Settings";
-import {Header} from "./Header";
+import React, {useState} from "react";
+import Dialog from '@mui/material/Dialog'
+import {DialogTitle, DialogContent, DialogContentText } from '@mui/material';
+import PropTypes from 'prop-types';
+import Button from '@mui/material/Button';
+import Settings from './Settings';
 
-export default function Zones(){
-    const user = useContext(UserContext)
-    const [redirect, setredirect] = useState(null)
+function SettingsDialog(props) {
+    const { onBackdropClick, open } = props;
 
-    useEffect(() => {
-        if (!user) {
-            setredirect('/')
-        }else if(!user.isStudent){
-            setredirect('/coach_view')
-        }
-    }, [user])
-    
+    // Calls onClose- sets open to false
     return(
-            <div>
-                <Header className="header" />
-                <h1>Training Zones</h1>
+        // onClose is built into Dialog such that clicking outside calls handleClose, which calls onBackdropClick prop
+        <Dialog onBackdropClick={onBackdropClick} open={open} >
+            <DialogTitle>Settings</DialogTitle>
+            <DialogContent>
+                <DialogContentText sx={{marginBottom: "10px"}}>
+                    Please fill in Functional Threshold Power and Heart Rate Zones from Training Peaks. For heart rate input the end of each zone (for 0 to 120 bpm, please input 120bpm).
+                </DialogContentText>
                 <Settings/>
-            </div>
+            </DialogContent>
+        </Dialog>
+    ); 
+}
+
+SettingsDialog.propTypes = {
+    onClose: PropTypes.func.isRequired,
+    open: PropTypes.bool.isRequired,
+};
+
+export default function Zones() {
+
+    const [open, setOpen] = useState(false);
+
+    /*useEffect(() => {
+        fetch(`forceprofile?workout_id=${props.workout_id}`)
+        .then()
+    })*/
+
+    // handleOpen called when button is clicked
+    const handleOpen = () => {
+        setOpen(true);
+    };
+
+    const handleClose = () => {
+        setOpen(false);
+    };
+
+    return (
+        <div>
+            <br />
+            <Button sx={{marginRight: "20px"}} variant="outlined" onClick={handleOpen}>
+                Settings
+            </Button>
+            <SettingsDialog
+                open={open}
+                onBackdropClick={handleClose}
+            />
+        </div>
     );
 }
