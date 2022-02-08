@@ -15,14 +15,14 @@ function RowerMenu(props)  {
     
     return (
         <Box sx={{ mt: 10, width: '40%'}}>
-            <Drawer
+            <Drawer 
             variant="permanent"
             ModalProps={{
                 keepMounted: true,
             }}
-            sx={{
+            sx={{ marginTop:"70px",
                 display: { xs: 'block', sm: 'block' }, 
-                '& .MuiDrawer-paper': {top: '70px',  boxSizing: 'border-box', width: drawerWidth },
+                '& .MuiDrawer-paper': { top: "70px", height:'90%', boxSizing: 'border-box', width: drawerWidth },
             }}
             >
                 <h3>Athletes</h3>
@@ -31,6 +31,7 @@ function RowerMenu(props)  {
                     {Object.entries(rowers).map(([uni, name]) => (
                         <MenuItem key={uni} onClick={() =>props.onClick(uni, name)}>
                             <ListItemText primary={name}/>
+                            {console.log(uni)}
                         </MenuItem>
                     ))}
                 </MenuList>
