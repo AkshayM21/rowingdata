@@ -23,7 +23,6 @@ export default function Rower(){
             <div>
                 <h1>Submit Workout Information</h1>
                 <SubmissionForm/>
-                <button>Settings</button>
             </div>
      )
 }
