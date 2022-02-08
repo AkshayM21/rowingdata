@@ -18,6 +18,7 @@ import Paper from "@mui/material/Paper"
 import Snackbar from '@mui/material/Snackbar';
 import IconButton from '@mui/material/IconButton';
 import CloseIcon from '@mui/icons-material/Close';
+import Zones from './zones';
 
 class SubmissionForm extends Component{
 
@@ -145,8 +146,8 @@ class SubmissionForm extends Component{
         if(newValue!=null){
             if (parseInt(newValue) > 10) {
                 this.setState({rpe: 10});
-            }else if(parseInt(newValue)<1){
-                this.setState({rpe: 1});
+            }else if(parseInt(newValue)<=0){
+                this.setState({rpe: 0});
             }else{
                 this.setState({rpe: newValue});
             }
@@ -189,8 +190,8 @@ class SubmissionForm extends Component{
           );
         return(
             <div>
-            <Paper elevation={3} style={{width: '50%', margin: "0 auto", borderRadius: 10}} >
-                <Typography style={{marginTop: "25px"}} variant="h6" gutterBottom component="div">
+            <Paper elevation={4} style={{width: '50%', margin: "0 auto"}} >
+                <Typography sx={{marginTop: "25px"}} variant="h6" gutterBottom component="div">
                     Submit Workout Data
                 </Typography>
                 <form id="submission-form" onSubmit={this.handleSubmit}>
@@ -258,7 +259,6 @@ class SubmissionForm extends Component{
                                 >
                                     <MenuItem value="decoupling">3x19 Decoupling Workout</MenuItem>
                                     <MenuItem value="rp3">Other RP3 workout</MenuItem>
-                                    <MenuItem value="hr_data">Garmin HR Data</MenuItem>
                                 </Select>
                             </FormControl>
                         </Grid>    
@@ -269,7 +269,7 @@ class SubmissionForm extends Component{
                                 label="RPE"
                                 type="number"
                                 placeholder="1-10"
-                                InputProps={{ inputProps: { min: "1", max: "10", step: "1" } }}
+                                InputProps={{ inputProps: { min: "0", max: "10", step: "1" } }}
                                 value={this.state.rpe}
                                 sx={{ minWidth: 200 }}
                                 onChange={this.handleRPEChange}
@@ -309,8 +309,9 @@ class SubmissionForm extends Component{
                                 </Grid>
                             </Stack>
                         </Grid>
-                        <Grid item sx={{marginBottom: "10px"}}>
-                            <Button disabled={!submittable} variant="contained" type="submit">Submit</ Button>
+                        <Grid item sx={{marginBottom: "10px", display:"flex"}}>
+                            <Zones/>
+                            <Button sx={{marginTop: "15px"}} disabled={!submittable} variant="contained" type="submit">Submit</ Button>
                         </Grid>
                     </Grid>
                 </form>
