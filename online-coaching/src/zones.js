@@ -49,7 +49,7 @@ export default function Zones() {
     return (
         <div>
             <br />
-            <Button sx={{marginRight: "20px"}} variant="outlined" onClick={handleOpen}>
+            <Button sx={{marginRight: "20px", marginBottom: "10px"}} variant="outlined" onClick={handleOpen}>
                 Settings
             </Button>
             <SettingsDialog
