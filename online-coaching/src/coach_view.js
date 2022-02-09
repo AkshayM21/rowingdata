@@ -12,14 +12,6 @@ import { areDayPropsEqual } from '@mui/lab/PickersDay/PickersDay';
 
 const drawerWidth = 240;
 
-/*function CircularIndeterminate() {
-    return (
-      <Box id='progress' sx={{ display: 'flex' }}>
-        <CircularProgress />
-      </Box>
-    );
-}*/
-
 function RowerCard(props){
     // Pass down props.workout['workout_id]
     // Add series of if-else statements in terms of what to return- different for decoupling, rp3, and garmin hr data
@@ -35,7 +27,7 @@ function RowerCard(props){
             setImg(response.force_profile);
             setVariance(response.stroke_variance);
         });      
-    })
+    }, [img])
 
     var seconds = Math.round(props.workout['avg_500m_time'] % 60*100)/100;
     var minutes = Math.floor(props.workout['avg_500m_time']/60);           
@@ -50,18 +42,20 @@ function RowerCard(props){
                     <Typography sx={{fontWeight: 'bold'}}>
                         Decoupling Workout
                     </Typography>
-                    <Typography sx={{ float:'left'}}>
+                    <Typography>
                         Decoupling Rate: {props.workout["decoupling_rate"]}%
+                    </Typography>
+                    <Typography>
                         Power Pieces 2-3: ({props.workout["leg_2_avg_power"]} Watts, {props.workout["leg_2_avg_power"]} Watts)
                     </Typography>
                     <Typography>
-                        HR Pieces 2-3: ({props.workout["leg_2_avg_pulse"]}, {props.workout["leg_3_avg_pulse"]})
+                        HR Pieces 2-3: {(props.workout["leg_2_avg_pulse"] !== 0)? props.workout["leg_2_avg_pulse"]+" bpm," : "N/A"} {(props.workout["leg_3_avg_pulse"]!==0)? props.workout["leg_3_avg_pulse"] + " bpm)":""}
                     </Typography>
-                    <Typography>
-                        hrTSS: {props.workout['hrtss']}
+                    <Typography> 
+                        hrTSS: {(props.workout['hrtss'] !==0)? props.workout['hrtss'] : 'N/A'}
                     </Typography>
                     <Typography sx={{ fontSize: 14 }}>
-                        RPE: {props.workout['rpe']}
+                        RPE: {(props.workout['rpe'] !== 0)? props.workout['rpe'] : 'N/A'}
                     </Typography>
                     <ForceProfile variance={variance} img={img} imse={props.workout["imse"]}/>
                 </CardContent>
@@ -75,10 +69,10 @@ function RowerCard(props){
                         {props.workout['date']}
                     </Typography>
                     <Typography sx={{fontWeight: 'bold'}} >
-                        Workout: {props.workout['description']}
+                        {props.workout['description']}
                     </Typography>
                     <Typography>
-                        Split: {minutes}:{seconds} /500m
+                        Split: {minutes}:{seconds<10? '0'+seconds : seconds} /500m
                     </Typography>
                     <Typography>
                         Average Power: {props.workout['avg_power']} Watts
@@ -93,10 +87,10 @@ function RowerCard(props){
                         Energy per Stroke: {props.workout['avg_energy_per_stroke']} J
                     </Typography>
                     <Typography>
-                        hrTSS: {props.workout['hrtss']}
+                        hrTSS: {(props.workout['hrtss'] !==0)? props.workout['hrtss'] : 'N/A'}
                     </Typography>
                     <Typography>
-                        RPE: {props.workout['rpe']}
+                        RPE: {(props.workout['rpe'] !== 0)? props.workout['rpe'] : 'N/A'}
                     </Typography>
                     <ForceProfile img={img} variance={variance} imse={props.workout["imse"]}/>
                     {/*workout_id=props.workout['workout_id']*/}
@@ -116,7 +110,7 @@ function Workouts(props) {
                 <Grid style={{width: '100%'}} container spacing={{ xs: 2, sm: 3, md: 3}} aria-busy={true} aria-describedby='progress'>
                     {props.workouts.map((obj, index) => (
                     // Currently set for 2 cards per column in xs, 4 per column for sm
-                    <Grid item xs={6} sm={3} md={3} key={index}>
+                    <Grid item xs={12} sm={4} md={3} key={index}>
                         <RowerCard uni={props.uni} workout={obj}/>
                     </Grid>))}
                 </Grid>              
@@ -193,9 +187,13 @@ function RowerTabs(props) {
 function Page(props) {
     const user = useContext(UserContext)
     const [redirect, setredirect] = useState(null)
-
     const [loading, setLoading] = React.useState(false);
     const [success, setSuccess] = React.useState(false);
+    const [uni, setUni] = useState("");
+    const [name, setName] = useState();
+    const [workouts, setWorkouts]= useState([]);
+    const [results, setResults] = useState([]); 
+    const timer = React.useRef();
 
     useEffect(() => {
         if (!user) {
@@ -204,12 +202,6 @@ function Page(props) {
             setredirect('/rower_view')
         }
     }, [user])
-
-    const[uni, setUni] = useState("");
-    const[name, setName] = useState();
-    const[workouts, setWorkouts]= useState([]);
-    const[results, setResults] = useState([]); 
-    const timer = React.useRef();
     
 
     const changeName = (newUni, newName) => {
