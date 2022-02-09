@@ -12,6 +12,14 @@ import { areDayPropsEqual } from '@mui/lab/PickersDay/PickersDay';
 
 const drawerWidth = 240;
 
+/*function CircularIndeterminate() {
+    return (
+      <Box id='progress' sx={{ display: 'flex' }}>
+        <CircularProgress />
+      </Box>
+    );
+}*/
+
 function RowerCard(props){
     // Pass down props.workout['workout_id]
     // Add series of if-else statements in terms of what to return- different for decoupling, rp3, and garmin hr data
