@@ -55,7 +55,7 @@ function RowerCard(props){
                         Power Pieces 2-3: ({props.workout["leg_2_avg_power"]} Watts, {props.workout["leg_3_avg_power"]} Watts)
                     </Typography>
                     <Typography>
-                        HR Pieces 2-3: ({props.workout["leg_2_avg_pulse"]} bpm, {props.workout["leg_3_avg_power"]} bpm)
+                        HR Pieces 2-3: ({props.workout["leg_2_avg_pulse"]} bpm, {props.workout["leg_3_avg_pulse"]} bpm)
                     </Typography>
                     <Typography> 
                         hrTSS: {(props.workout['hrtss'] !==0)? props.workout['hrtss'] : 'N/A'}
@@ -63,7 +63,7 @@ function RowerCard(props){
                     <Typography sx={{ fontSize: 14 }}>
                         RPE: {(props.workout['rpe'] !== 0)? props.workout['rpe'] : 'N/A'}
                     </Typography>
-                    <ForceProfile variance={variance} img={props.img} imse={props.workout["imse"]}/>
+                    <ForceProfile img={props.img} imse={props.workout["imse"]}/>
                 </CardContent>
             </Card>    
         )
@@ -98,7 +98,7 @@ function RowerCard(props){
                     <Typography>
                         RPE: {(props.workout['rpe'] !== 0)? props.workout['rpe'] : 'N/A'}
                     </Typography>
-                    <ForceProfile img={props.img} variance={variance} imse={props.workout["imse"]}/>
+                    <ForceProfile img={props.img} imse={props.workout["imse"]}/>
                     {/*workout_id=props.workout['workout_id']*/}
                 </CardContent>
             </Card>    
@@ -118,6 +118,7 @@ function Workouts(props) {
                     // Currently set for 2 cards per column in xs, 4 per column for sm
                     <Grid item xs={12} sm={4} md={3} key={index}>
                         <RowerCard uni={props.uni} workout={obj} img={props.force_profiles[index]}/>
+                        {console.log(props.force_profiles)}
                     </Grid>))}
                 </Grid>              
             </Box>
@@ -190,6 +191,8 @@ function RowerTabs(props) {
 
 }
 
+var force_profiles = [];
+
 function Page(props) {
     const user = useContext(UserContext)
     const [redirect, setredirect] = useState(null)
@@ -215,28 +218,28 @@ function Page(props) {
         setName(newName);
     }
 
-    const force_profiles = [];
     useEffect(() => {
         fetch(`/workouts?uni=${uni}`).then((response) => response.json())
         .then(response => {
+            
             setWorkouts(response.data);
+            for (let i = 0; i < response.data.length; i++){
+                // Currently set for 2 cards per column in xs, 4 per column for sm
+                fetch(`/graphs?uni=${uni}&workout_id=${response.data[i]["workout_id"]}`).then((response) => response.json())
+                .then(response => {
+                    force_profiles[i]=response.force_profile; 
+                    //setVariance(response.stroke_variance);
+                })   
+                {console.log(force_profiles)}
+            }
         });
 
         fetch(`/sors?uni=${uni}`).then((response) => response.json())
         .then(response => {
             setResults(response.data);
         });
-        for (let i = 0; i < workouts.length; i++){
-            // Currently set for 2 cards per column in xs, 4 per column for sm
-            fetch(`/graphs?uni=${uni}&workout_id=${workouts[i]["workout_id"]}`).then((response) => response.json())
-            .then(response => {
-                setImg(response.force_profile);
-                force_profiles[i]=img; 
-                //setVariance(response.stroke_variance);
-            })   
-        }
-        force_profiles.length = workouts.length;
     }, [uni])
+    {console.log(force_profiles)}
 
     if (redirect) {
         return <Navigate to={redirect}/>
@@ -254,7 +257,7 @@ function Page(props) {
             <div className='coach_view'>
                 <RowerMenu onClick={changeName} />
                 <h1>{name} Profile</h1>
-                <RowerTabs results={results} workouts={workouts} force_profiles={force_profiles} uni={uni} name={name} loading={loading} success={success}/>
+                <RowerTabs results={results} workouts={workouts} force_profiles={force_profiles} uni={uni} name={name} />
             </div>
         )
     }
