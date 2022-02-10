@@ -13,17 +13,111 @@ import {DialogTitle, Dialog, Button} from '@mui/material';
 import PropTypes from 'prop-types';
 import { Base64 } from 'js-base64';
 
+function Page(props) {
+    const user = useContext(UserContext)
+    const [redirect, setredirect] = useState(null)
+    const [force_profiles, setForce_profiles]=useState([]);
+    const [uni, setUni] = useState("");
+    const [name, setName] = useState();
+    const [workouts, setWorkouts]= useState([]);
+    const [results, setResults] = useState([]); 
+
+    useEffect(() => {
+        if (!user) {
+            setredirect('/')
+        }else if(user.isStudent){
+            setredirect('/rower_view')
+        }
+    }, [user])
+    
+
+    const changeName = (newUni, newName) => {
+        setUni(newUni);
+        setName(newName);
+    }
+
+    useEffect(() => {
+
+        fetch(`/workouts?uni=${uni}`).then((response) => response.json())
+        .then(response => {
+            setWorkouts(response.data); 
+            var profiles = [];
+            for (let i = 0; i < response.data.length; i++){
+                // Currently set for 2 cards per column in xs, 4 per column for sm
+                fetch(`/graphs?uni=${uni}&workout_id=${response.data[i]["workout_id"]}`).then((response) => response.json())
+                .then(response => {
+                    profiles[i]=response.force_profile; 
+                    setForce_profiles(profiles);
+                    /*console.log(force_profiles[i])}*/
+                    //setVariance(response.stroke_variance);
+                })  
+                profiles.length=workouts.length;
+                
+            }
+            
+        });
+        /*fetch(`/graphs?uni=${uni}&workout_id=${workouts[0]["workout_id"]}`).then((response) => response.json())
+        .then(response => {
+            force_profiles[0]=response.force_profile; 
+            /*console.log(force_profiles[i])}
+            //setVariance(response.stroke_variance);
+        })*/
+
+        fetch(`/sors?uni=${uni}`).then((response) => response.json())
+        .then(response => {
+            setResults(response.data);
+        });
+    }, [uni])
+
+    /*useEffect(() => {
+        for (let i = 0; i < workouts.length; i++){
+            // Currently set for 2 cards per column in xs, 4 per column for sm
+            fetch(`/graphs?uni=${uni}&workout_id=${workouts[i]["workout_id"]}`).then((response) => response.json())
+            .then(response => {
+                force_profiles[i]=response.force_profile; 
+                {/*console.log(force_profiles[i])}
+                //setVariance(response.stroke_variance);
+            })   
+            
+        }
+        
+    }, [workouts]);*/
+
+    if (redirect) {
+        return <Navigate to={redirect}/>
+    }
+
+    if (uni === "") {
+        return(
+            <div>
+                <RowerMenu onClick={changeName} />
+                <h2>Please Select A Rower</h2>
+            </div>
+        )
+    } else {
+        return(
+            <div className='coach_view'>
+                <RowerMenu onClick={changeName} />
+                <h1>{name} Profile</h1>
+                <RowerTabs results={results} workouts={workouts} force_profiles={force_profiles} uni={uni} name={name} />
+            </div>
+        )
+    }
+}
+
 function ForceDialog(props) {
-    const { onBackdropClick, open } = props;
+    const { onBackdropClick, open, img, workouts, uni} = props;
     
     return(
         // onClose is built into Dialog such that clicking outside calls handleClose, which calls onBackdropClick prop
         <Dialog onBackdropClick={onBackdropClick} open={open} >
-            <img src={`data:image/png;base64,${props.img}`}/>
+            <img src={`data:image/png;base64,${img}`}/>
             <Typography sx= {{fontWeight: 'bold', mt: '5%'}} align={'center'}>
                 IMSE: {props.imse}
             </Typography>
             {/*<img src={`data:image/png;base64,${props.variance}`}/>*/}
+            {console.log(img)}
+            
             
         </Dialog>
     ); 
@@ -47,6 +141,9 @@ function ForceProfile(props) {
         setOpen(false);
     };
 
+    {console.log(props.img)}
+    
+
     return (
         <div>
             <br />
@@ -59,6 +156,8 @@ function ForceProfile(props) {
                 img={props.img}
                 variance={props.variance}
                 imse={props.imse}
+                workouts={props.workouts}
+                uni={props.uni}
             />
         </div>
     );
@@ -118,8 +217,8 @@ function RowerCard(props){
                     <Typography sx={{ fontSize: 14 }}>
                         RPE: {(props.workout['rpe'] !== 0)? props.workout['rpe'] : 'N/A'}
                     </Typography>
-                    <ForceProfile img={props.img} imse={props.workout["imse"]}/>
-                    
+                    <ForceProfile img={props.img} uni={props.uni} imse={props.workout["imse"]} workouts={props.workouts}/>
+                    {console.log(props.img)}
                 </CardContent>
             </Card>    
         )
@@ -154,8 +253,9 @@ function RowerCard(props){
                     <Typography>
                         RPE: {(props.workout['rpe'] !== 0)? props.workout['rpe'] : 'N/A'}
                     </Typography>
-                    <ForceProfile img={props.img} imse={props.workout["imse"]}/>
+                    <ForceProfile img={props.img} uni={props.uni} imse={props.workout["imse"]} workouts={props.workouts}/>
                     {/*workout_id=props.workout['workout_id']*/}
+                    {console.log(props.img)}
                 </CardContent>
             </Card>    
         )
@@ -163,6 +263,7 @@ function RowerCard(props){
 }
 
 function Workouts(props) {
+    {console.log(props.force_profiles)}
 
     if (props.workouts.length === 0) {
         return(<h1 className='empty-workouts'>No Workouts Submitted</h1>)
@@ -173,7 +274,7 @@ function Workouts(props) {
                     {props.workouts.map((obj, index) => (
                     // Currently set for 2 cards per column in xs, 4 per column for sm
                     <Grid item xs={12} sm={4} md={3} key={index}>
-                        <RowerCard uni={props.uni} workout={obj} img={props.force_profiles[index]}/>
+                        <RowerCard uni={props.uni} workout={obj} workouts={props.workouts} img={props.force_profiles[index]}/>
                         
                     </Grid>))}
                 </Grid>              
@@ -216,6 +317,7 @@ function RowerTabs(props) {
     const handleChange = (event, newValue) => {
         setValue(newValue);
     };
+    {console.log(props.force_profiles)}
 
     /*const handleClick = () => {
         setSuccess(false);
@@ -225,6 +327,7 @@ function RowerTabs(props) {
             setLoading(false);
         }, 3000);
     };*/
+    {console.log(props.workouts)}
 
     return (
         <Box sx={{ flexGrow: 1, p: 3, ml: { sm: `${drawerWidth}px` }, width: { sm: `calc(100% - ${drawerWidth}px)` }, overflow: 'scrollable' }}>
@@ -245,78 +348,6 @@ function RowerTabs(props) {
         </Box>  
     );        
 
-}
-
-var force_profiles = [];
-
-function Page(props) {
-    const user = useContext(UserContext)
-    const [redirect, setredirect] = useState(null)
-    const [success, setSuccess] = useState(false);
-    const [uni, setUni] = useState("");
-    const [name, setName] = useState();
-    const [workouts, setWorkouts]= useState([]);
-    const [results, setResults] = useState([]); 
-
-    useEffect(() => {
-        if (!user) {
-            setredirect('/')
-        }else if(user.isStudent){
-            setredirect('/rower_view')
-        }
-    }, [user])
-    
-
-    const changeName = (newUni, newName) => {
-        setUni(newUni);
-        setName(newName);
-    }
-
-    useEffect(() => {
-        fetch(`/workouts?uni=${uni}`).then((response) => response.json())
-        .then(response => {
-            
-            setWorkouts(response.data);
-            for (let i = 0; i < response.data.length; i++){
-                // Currently set for 2 cards per column in xs, 4 per column for sm
-                fetch(`/graphs?uni=${uni}&workout_id=${response.data[i]["workout_id"]}`).then((response) => response.json())
-                .then(response => {
-                    force_profiles[i]=response.force_profile; 
-                    setSuccess(true);
-
-                    {/*console.log(force_profiles[i])*/}
-                    //setVariance(response.stroke_variance);
-                })   
-                
-            }
-        });
-
-        fetch(`/sors?uni=${uni}`).then((response) => response.json())
-        .then(response => {
-            setResults(response.data);
-        });
-    }, [uni, force_profiles])
-
-    if (redirect) {
-        return <Navigate to={redirect}/>
-    }
-
-    if (uni === "") {
-        return(
-            <div>
-                <RowerMenu onClick={changeName} />
-                <h2>Please Select A Rower</h2>
-            </div>
-        )
-    } else {
-        return(
-            <div className='coach_view'>
-                <RowerMenu onClick={changeName} />
-                <h1>{name} Profile</h1>
-                <RowerTabs results={results} workouts={workouts} force_profiles={force_profiles} uni={uni} name={name} />
-            </div>
-        )
-    }
 }
 
 export default Page;
