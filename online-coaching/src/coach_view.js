@@ -5,10 +5,65 @@ import {Box, Drawer, Tab, Card, CardContent, Typography, Grid, Toolbar, Divider,
 import { TabContext, TabList, TabPanel } from '@mui/lab';
 import { DataGrid } from '@mui/x-data-grid';
 import RowerMenu from "./RowerMenu";
-import ForceProfile from "./force_profile";
+//import ForceProfile from "./force_profile";
 import CircularProgress from '@mui/material/CircularProgress';
 import { areDayPropsEqual } from '@mui/lab/PickersDay/PickersDay';
 //import CardActions from '@mui/material/CardActions';
+import {DialogTitle, Dialog, Button} from '@mui/material';
+import PropTypes from 'prop-types';
+import { Base64 } from 'js-base64';
+
+function ForceDialog(props) {
+    const { onBackdropClick, open } = props;
+    
+    return(
+        // onClose is built into Dialog such that clicking outside calls handleClose, which calls onBackdropClick prop
+        <Dialog onBackdropClick={onBackdropClick} open={open} >
+            <img src={`data:image/png;base64,${props.img}`}/>
+            <Typography sx= {{fontWeight: 'bold', mt: '5%'}} align={'center'}>
+                IMSE: {props.imse}
+            </Typography>
+            {/*<img src={`data:image/png;base64,${props.variance}`}/>*/}
+            
+        </Dialog>
+    ); 
+}
+
+ForceDialog.propTypes = {
+    onClose: PropTypes.func.isRequired,
+    open: PropTypes.bool.isRequired,
+};
+
+function ForceProfile(props) {
+
+    const [open, setOpen] = useState(false);
+
+    // handleOpen called when button is clicked
+    const handleOpen = () => {
+        setOpen(true);
+    };
+
+    const handleClose = () => {
+        setOpen(false);
+    };
+
+    return (
+        <div>
+            <br />
+            <Button variant="outlined" onClick={handleOpen}>
+                Force Profile
+            </Button>
+            <ForceDialog
+                open={open}
+                onBackdropClick={handleClose}
+                img={props.img}
+                variance={props.variance}
+                imse={props.imse}
+            />
+        </div>
+    );
+}
+
 
 const drawerWidth = 240;
 
@@ -64,6 +119,7 @@ function RowerCard(props){
                         RPE: {(props.workout['rpe'] !== 0)? props.workout['rpe'] : 'N/A'}
                     </Typography>
                     <ForceProfile img={props.img} imse={props.workout["imse"]}/>
+                    
                 </CardContent>
             </Card>    
         )
@@ -118,7 +174,7 @@ function Workouts(props) {
                     // Currently set for 2 cards per column in xs, 4 per column for sm
                     <Grid item xs={12} sm={4} md={3} key={index}>
                         <RowerCard uni={props.uni} workout={obj} img={props.force_profiles[index]}/>
-                        {console.log(props.force_profiles)}
+                        
                     </Grid>))}
                 </Grid>              
             </Box>
@@ -196,11 +252,9 @@ var force_profiles = [];
 function Page(props) {
     const user = useContext(UserContext)
     const [redirect, setredirect] = useState(null)
-    const [loading, setLoading] = React.useState(false);
-    const [success, setSuccess] = React.useState(false);
+    const [success, setSuccess] = useState(false);
     const [uni, setUni] = useState("");
     const [name, setName] = useState();
-    const [img, setImg] = useState();
     const [workouts, setWorkouts]= useState([]);
     const [results, setResults] = useState([]); 
 
@@ -228,9 +282,12 @@ function Page(props) {
                 fetch(`/graphs?uni=${uni}&workout_id=${response.data[i]["workout_id"]}`).then((response) => response.json())
                 .then(response => {
                     force_profiles[i]=response.force_profile; 
+                    setSuccess(true);
+
+                    {/*console.log(force_profiles[i])*/}
                     //setVariance(response.stroke_variance);
                 })   
-                {console.log(force_profiles)}
+                
             }
         });
 
@@ -238,8 +295,7 @@ function Page(props) {
         .then(response => {
             setResults(response.data);
         });
-    }, [uni])
-    {console.log(force_profiles)}
+    }, [uni, force_profiles])
 
     if (redirect) {
         return <Navigate to={redirect}/>
