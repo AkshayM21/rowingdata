@@ -26,16 +26,14 @@ function RowerCard(props){
     // For rp3 workouts- show workout_description, rpe, hrTSS (if avg_pulse != 0), stroke rate, stroke length in main
     // For Garmin HR data, show workout_description, rpe, hrTSS
     // For decoupling- show power and heart rate for both pieces, decoupling rate, rpe, hrTSS
-    const[img, setImg] = useState();
-    const[variance, setVariance] = useState();
 
-    useEffect(() => {
+    /*useEffect(() => {
         fetch(`/graphs?uni=${props.uni}&workout_id=${props.workout["workout_id"]}`).then((response) => response.json())
         .then(response => {
             setImg(response.force_profile);
             setVariance(response.stroke_variance);
         });      
-    }, [img])
+    })*/
 
     var seconds = Math.round(props.workout['avg_500m_time'] % 60*100)/100;
     var minutes = Math.floor(props.workout['avg_500m_time']/60);           
@@ -54,10 +52,10 @@ function RowerCard(props){
                         Decoupling Rate: {props.workout["decoupling_rate"]}%
                     </Typography>
                     <Typography>
-                        Power Pieces 2-3: ({props.workout["leg_2_avg_power"]} Watts, {props.workout["leg_2_avg_power"]} Watts)
+                        Power Pieces 2-3: ({props.workout["leg_2_avg_power"]} Watts, {props.workout["leg_3_avg_power"]} Watts)
                     </Typography>
                     <Typography>
-                        HR Pieces 2-3: {(props.workout["leg_2_avg_pulse"] !== 0)? props.workout["leg_2_avg_pulse"]+" bpm," : "N/A"} {(props.workout["leg_3_avg_pulse"]!==0)? props.workout["leg_3_avg_pulse"] + " bpm)":""}
+                        HR Pieces 2-3: ({props.workout["leg_2_avg_pulse"]} bpm, {props.workout["leg_3_avg_power"]} bpm)
                     </Typography>
                     <Typography> 
                         hrTSS: {(props.workout['hrtss'] !==0)? props.workout['hrtss'] : 'N/A'}
@@ -65,7 +63,7 @@ function RowerCard(props){
                     <Typography sx={{ fontSize: 14 }}>
                         RPE: {(props.workout['rpe'] !== 0)? props.workout['rpe'] : 'N/A'}
                     </Typography>
-                    <ForceProfile variance={variance} img={img} imse={props.workout["imse"]}/>
+                    <ForceProfile variance={variance} img={props.img} imse={props.workout["imse"]}/>
                 </CardContent>
             </Card>    
         )
@@ -100,7 +98,7 @@ function RowerCard(props){
                     <Typography>
                         RPE: {(props.workout['rpe'] !== 0)? props.workout['rpe'] : 'N/A'}
                     </Typography>
-                    <ForceProfile img={img} variance={variance} imse={props.workout["imse"]}/>
+                    <ForceProfile img={props.img} variance={variance} imse={props.workout["imse"]}/>
                     {/*workout_id=props.workout['workout_id']*/}
                 </CardContent>
             </Card>    
@@ -115,11 +113,11 @@ function Workouts(props) {
     } else {
         return(
             <Box>
-                <Grid style={{width: '100%'}} container spacing={{ xs: 2, sm: 3, md: 3}} aria-busy={true} aria-describedby='progress'>
+                <Grid style={{width: '100%', overflow: 'scrollable'}} container spacing={{ xs: 2, sm: 3, md: 3}} aria-busy={true} aria-describedby='progress'>
                     {props.workouts.map((obj, index) => (
                     // Currently set for 2 cards per column in xs, 4 per column for sm
                     <Grid item xs={12} sm={4} md={3} key={index}>
-                        <RowerCard uni={props.uni} workout={obj}/>
+                        <RowerCard uni={props.uni} workout={obj} img={props.force_profiles[index]}/>
                     </Grid>))}
                 </Grid>              
             </Box>
@@ -181,7 +179,7 @@ function RowerTabs(props) {
                     </TabList>
                 </Box>
                 <TabPanel value="1">
-                    <Workouts workouts= {props.workouts} uni={props.uni}/>
+                    <Workouts workouts= {props.workouts} uni={props.uni} force_profiles={props.force_profiles}/>
                 </TabPanel> 
                 <TabPanel value="2">
                     <SorS results= {props.results} uni={props.uni}/>
@@ -199,9 +197,9 @@ function Page(props) {
     const [success, setSuccess] = React.useState(false);
     const [uni, setUni] = useState("");
     const [name, setName] = useState();
+    const [img, setImg] = useState();
     const [workouts, setWorkouts]= useState([]);
     const [results, setResults] = useState([]); 
-    const timer = React.useRef();
 
     useEffect(() => {
         if (!user) {
@@ -215,15 +213,9 @@ function Page(props) {
     const changeName = (newUni, newName) => {
         setUni(newUni);
         setName(newName);
-
-        setSuccess(false);
-        setLoading(true);
-        timer.current = window.setTimeout(() => {
-            setSuccess(true);
-            setLoading(false);
-        }, 250);
     }
 
+    const force_profiles = [];
     useEffect(() => {
         fetch(`/workouts?uni=${uni}`).then((response) => response.json())
         .then(response => {
@@ -234,9 +226,17 @@ function Page(props) {
         .then(response => {
             setResults(response.data);
         });
-        
+        for (let i = 0; i < workouts.length; i++){
+            // Currently set for 2 cards per column in xs, 4 per column for sm
+            fetch(`/graphs?uni=${uni}&workout_id=${workouts[i]["workout_id"]}`).then((response) => response.json())
+            .then(response => {
+                setImg(response.force_profile);
+                force_profiles[i]=img; 
+                //setVariance(response.stroke_variance);
+            })   
+        }
+        force_profiles.length = workouts.length;
     }, [uni])
-
 
     if (redirect) {
         return <Navigate to={redirect}/>
@@ -254,7 +254,7 @@ function Page(props) {
             <div className='coach_view'>
                 <RowerMenu onClick={changeName} />
                 <h1>{name} Profile</h1>
-                <RowerTabs results= {results} workouts={workouts} uni={uni} name={name} loading={loading} success={success}/>
+                <RowerTabs results={results} workouts={workouts} force_profiles={force_profiles} uni={uni} name={name} loading={loading} success={success}/>
             </div>
         )
     }
