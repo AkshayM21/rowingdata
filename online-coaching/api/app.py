@@ -13,6 +13,7 @@ import PIL.Image as Image
 import json
 import pandas as pd
 import statistics
+import numpy as np
 import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
@@ -275,6 +276,7 @@ def parse(df, settings_df, params):
         imse = graphs(df, ranges, params["name"], workout_id)
         output_df = pd.DataFrame(
             {
+                "date":"",
                 "workout_id":workout_id,
                 "workout_type":params['workout_type'],
                 "avg_power": avg_power,
@@ -300,7 +302,7 @@ def parse(df, settings_df, params):
             }, index=[params['date']]
         )
 
-        return pd.concat([past_data_df, output_df])
+        return updateCSV(past_data_df, output_df)
 
         #output_df.to_csv(params["output_path"])
         
@@ -308,6 +310,7 @@ def parse(df, settings_df, params):
         imse = graphs(df, ranges, params["name"], workout_id)
         output_df = pd.DataFrame(
             {
+                "date":"",
                 "workout_id":workout_id,
                 "workout_type":params['workout_type'],
                 "avg_power":avg_power,
@@ -334,7 +337,23 @@ def parse(df, settings_df, params):
         )
 
         #output_df.to_csv(params["output_path"])
-        return pd.concat([past_data_df, output_df])
+        return updateCSV(past_data_df,output_df)
+
+def updateCSV(past_data_df, output_df):
+  #check if the workout_id is present
+  if output_df["workout_id"][0] in past_data_df.values:
+    #update row
+    #index = np.nonzero(past_data_df.index.get_loc(past_data_df.index[past_data_df['workout_id'] == output_df["workout_id"][0]].tolist()[0])==True)[0][0]
+    index = np.nonzero((past_data_df['workout_id'] == output_df["workout_id"][0]).values==True)[0][0]
+    past_data_df.iloc[index, :] = output_df.values[0]
+    #need to change
+    as_list = past_data_df.index.values.copy()
+    as_list[index] = output_df.index[0]
+    past_data_df.index._data = as_list.copy()
+    return past_data_df
+  else:
+    #add to end because not present
+    return pd.concat([past_data_df, output_df])
 
 def get_sors(uni):
   df = get_csv_from_cloud(base_path+"SorS.csv")
@@ -375,9 +394,9 @@ def get_workouts(uni):
       "avg_500m_time": round(row[9],2),
       "leg_2_avg_power": round(row[10],2) if not pd.isnull(row[10]) else "",
       "leg_2_avg_pulse": round(row[11],2) if not pd.isnull(row[11]) else "",
-      "leg_3_avg_power": round(row[12],2) if not pd.isnull(row[10]) else "",
-      "leg_3_avg_pulse": round(row[13],2) if not pd.isnull(row[11]) else "",
-      "decoupling_rate": round(row[14],2) if not pd.isnull(row[12]) else "",
+      "leg_3_avg_power": round(row[12],2) if not pd.isnull(row[12]) else "",
+      "leg_3_avg_pulse": round(row[13],2) if not pd.isnull(row[13]) else "",
+      "decoupling_rate": round(row[14],2) if not pd.isnull(row[14]) else "",
       "rpe": row[15],
       "description": row[16],
       "imse": round(row[17],2),
