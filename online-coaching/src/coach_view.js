@@ -45,7 +45,6 @@ function Page() {
             setWorkouts(response.data); 
             var profiles = [];
             for (let i = 0; i < response.data.length; i++){
-                // Currently set for 2 cards per column in xs, 4 per column for sm
                 fetch(`/graphs?uni=${uni}&workout_id=${response.data[i]["workout_id"]}`).then((response) => response.json())
                 .then(response => {
                     force_profiles[i]=response.force_profile; 
@@ -60,12 +59,6 @@ function Page() {
             console.log(force_profiles)
             
         });
-        /*fetch(`/graphs?uni=${uni}&workout_id=${workouts[0]["workout_id"]}`).then((response) => response.json())
-        .then(response => {
-            force_profiles[0]=response.force_profile; 
-            /*console.log(force_profiles[i])}
-            //setVariance(response.stroke_variance);
-        })*/
 
         fetch(`/sors?uni=${uni}`).then((response) => response.json())
         .then(response => {
@@ -73,29 +66,15 @@ function Page() {
         });
     }, [uni])
 
-    /*useEffect(() => {
-        for (let i = 0; i < workouts.length; i++){
-            // Currently set for 2 cards per column in xs, 4 per column for sm
-            fetch(`/graphs?uni=${uni}&workout_id=${workouts[i]["workout_id"]}`).then((response) => response.json())
-            .then(response => {
-                force_profiles[i]=response.force_profile; 
-                {/*console.log(force_profiles[i])}
-                //setVariance(response.stroke_variance);
-            })   
-            
-        }
-        
-    }, [workouts]);*/
-
     if (redirect) {
         return <Navigate to={redirect}/>
     }
 
     if (uni === "") {
         return(
-            <div>
+            <div className='coach_view'>
                 <RowerMenu onClick={changeName} />
-                <h2>Please Select A Rower</h2>
+                <h1>Please Select A Rower</h1>
             </div>
         )
     } else {
@@ -318,15 +297,6 @@ function RowerTabs(props) {
     const handleChange = (event, newValue) => {
         setValue(newValue);
     };
-
-    /*const handleClick = () => {
-        setSuccess(false);
-        setLoading(true);
-        timer.current = window.setTimeout(() => {
-            setSuccess(true);
-            setLoading(false);
-        }, 3000);
-    };*/
 
     return (
         <Box sx={{ flexGrow: 1, p: 3, ml: { sm: `${drawerWidth}px` }, width: { sm: `calc(100% - ${drawerWidth}px)` }, overflow: 'scrollable' }}>
