@@ -3,10 +3,7 @@
   display: flex;
   flex-flow: column;
   height: 100%;
-  font-family:'Gotham';
 }
-
-
 
 .content {
   background: url(boathouse.png) repeat 0 0;
@@ -23,13 +20,12 @@
   background-size:100%
 }
 
-
 .App .sors {
   background-color: white;
 }
 
 .App .coach_view h1 {
-  font-family:'Roboto';
+  margin-left:12%;
 }
 
 .App .header {
