@@ -214,7 +214,7 @@ function RowerCard(props){
                     <Typography> 
                         hrTSS: {(props.workout['hrtss'] !==0)? props.workout['hrtss'] : 'N/A'}
                     </Typography>
-                    <Typography sx={{ fontSize: 14 }}>
+                    <Typography>
                         RPE: {(props.workout['rpe'] !== 0)? props.workout['rpe'] : 'N/A'}
                     </Typography>
                     <ForceProfile img={props.img} uni={props.uni} imse={props.workout["imse"]} workouts={props.workouts}/>
