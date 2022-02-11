@@ -415,15 +415,14 @@ def get_workouts(uni):
 # note: tuple ranges are start inclusive, end exclusive -- [start, end) -- as this captures the desired rows using slices
 # on_time is in seconds, amount of time spent for each stretch of the workout (between breaks)
 def find_valid_ranges(df, on_time):
-
     # basic intuition: find every stroke that is number 1, determine if the range btwn the ones is a break or not
     stroke_one_rows = df[df['stroke_number']==1]
-
+    
     range_list = []
 
     #note -- the ranges in these tuples are exclusive -- [start, end) -- because that's how pandas treats ranges
     #so the end range index will point to the index immediately after the actual end of range
-    for i in range(0, len(stroke_one_rows.index)-1):
+    for i in range(len(stroke_one_rows.index)-1):
         range_list.append((stroke_one_rows.index[i], stroke_one_rows.index[i+1]))
     range_list.append((stroke_one_rows.index[len(stroke_one_rows.index)-1], len(df.index))) # last range (goes till end), not covered by loop
 

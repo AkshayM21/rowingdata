@@ -6,10 +6,23 @@
   font-family:'Gotham';
 }
 
-body {
+
+
+.content {
   background: url(boathouse.png) repeat 0 0;
   background-size:100%
 }
+
+.content.coach_view{
+  background: #ffffff repeat 0 0;
+  background-size:100%
+}
+
+.content.rower_view{
+  background: url(boathouse.png) repeat 0 0;
+  background-size:100%
+}
+
 
 .App .sors {
   background-color: white;

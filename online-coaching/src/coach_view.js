@@ -13,7 +13,7 @@ import {DialogTitle, Dialog, Button} from '@mui/material';
 import PropTypes from 'prop-types';
 import { Base64 } from 'js-base64';
 
-function Page(props) {
+function Page() {
     const user = useContext(UserContext)
     const [redirect, setredirect] = useState(null)
     const [variance, setVariance] = useState([]);
@@ -22,6 +22,7 @@ function Page(props) {
     const [name, setName] = useState();
     const [workouts, setWorkouts]= useState([]);
     const [results, setResults] = useState([]); 
+
 
     useEffect(() => {
         if (!user) {

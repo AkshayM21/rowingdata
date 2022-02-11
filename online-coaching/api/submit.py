@@ -1,11 +1,11 @@
 import os
 import pandas as pd
 from app import *
-path = "12_08_21 Decoupling"
-on_time=1140
-workout_type="decoupling"
+path = "10_01_21 40'"
+on_time=2400
+workout_type="other"
 date=path.split()[0]
-description="3x19 Decoupling"
+description="40 minute test"
 directory = 'rp3_Files/'+path
 
 for filename in os.listdir(directory):
@@ -22,5 +22,7 @@ for filename in os.listdir(directory):
     params['description'] = description
     params['rpe'] = 0
     if (uni != ""):
+        if uni == "sjm2254": continue
         settings=get_csv_from_cloud("rower_stats/"+params['name']+"/settings.csv")
+        print(params["name"])
         save_csv_to_cloud(parse(pd.read_csv(f), settings, params), "rower_stats/"+params["name"]+"/workouts.csv")

@@ -7,6 +7,7 @@ export default function Rower(){
     const user = useContext(UserContext)
     const [redirect, setredirect] = useState(null)
 
+
     useEffect(() => {
         if (!user) {
             setredirect('/')
@@ -20,7 +21,7 @@ export default function Rower(){
     }
     
     return(
-            <div>
+            <div className="rower_view">
                 <h1>Submit Workout Information</h1>
                 <SubmissionForm/>
             </div>
