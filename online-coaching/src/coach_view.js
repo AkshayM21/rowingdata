@@ -16,6 +16,7 @@ import { Base64 } from 'js-base64';
 function Page(props) {
     const user = useContext(UserContext)
     const [redirect, setredirect] = useState(null)
+    const [profiles, setProfiles] = useState([]);
     const [force_profiles, setForce_profiles]=useState([]);
     const [uni, setUni] = useState("");
     const [name, setName] = useState();
@@ -46,14 +47,14 @@ function Page(props) {
                 // Currently set for 2 cards per column in xs, 4 per column for sm
                 fetch(`/graphs?uni=${uni}&workout_id=${response.data[i]["workout_id"]}`).then((response) => response.json())
                 .then(response => {
-                    profiles[i]=response.force_profile; 
-                    setForce_profiles(profiles);
+                    force_profiles[i]=response.force_profile; 
+                    setForce_profiles([...force_profiles]);
                     /*console.log(force_profiles[i])}*/
                     //setVariance(response.stroke_variance);
                 })  
-                profiles.length=workouts.length;
-                
+                //profiles.length=workouts.length;
             }
+            console.log(force_profiles)
             
         });
         /*fetch(`/graphs?uni=${uni}&workout_id=${workouts[0]["workout_id"]}`).then((response) => response.json())
@@ -99,6 +100,7 @@ function Page(props) {
             <div className='coach_view'>
                 <RowerMenu onClick={changeName} />
                 <h1>{name} Profile</h1>
+                {console.log(force_profiles)}
                 <RowerTabs results={results} workouts={workouts} force_profiles={force_profiles} uni={uni} name={name} />
             </div>
         )
@@ -116,7 +118,7 @@ function ForceDialog(props) {
                 IMSE: {props.imse}
             </Typography>
             {/*<img src={`data:image/png;base64,${props.variance}`}/>*/}
-            {console.log(img)}
+            
             
             
         </Dialog>
@@ -140,9 +142,6 @@ function ForceProfile(props) {
     const handleClose = () => {
         setOpen(false);
     };
-
-    {console.log(props.img)}
-    
 
     return (
         <div>
@@ -218,7 +217,7 @@ function RowerCard(props){
                         RPE: {(props.workout['rpe'] !== 0)? props.workout['rpe'] : 'N/A'}
                     </Typography>
                     <ForceProfile img={props.img} uni={props.uni} imse={props.workout["imse"]} workouts={props.workouts}/>
-                    {console.log(props.img)}
+                   
                 </CardContent>
             </Card>    
         )
@@ -254,8 +253,6 @@ function RowerCard(props){
                         RPE: {(props.workout['rpe'] !== 0)? props.workout['rpe'] : 'N/A'}
                     </Typography>
                     <ForceProfile img={props.img} uni={props.uni} imse={props.workout["imse"]} workouts={props.workouts}/>
-                    {/*workout_id=props.workout['workout_id']*/}
-                    {console.log(props.img)}
                 </CardContent>
             </Card>    
         )
@@ -263,7 +260,7 @@ function RowerCard(props){
 }
 
 function Workouts(props) {
-    {console.log(props.force_profiles)}
+    var count=0;
 
     if (props.workouts.length === 0) {
         return(<h1 className='empty-workouts'>No Workouts Submitted</h1>)
@@ -275,7 +272,8 @@ function Workouts(props) {
                     // Currently set for 2 cards per column in xs, 4 per column for sm
                     <Grid item xs={12} sm={4} md={3} key={index}>
                         <RowerCard uni={props.uni} workout={obj} workouts={props.workouts} img={props.force_profiles[index]}/>
-                        
+                        {console.log(props.force_profiles[index])}
+                        {console.log(index)}
                     </Grid>))}
                 </Grid>              
             </Box>
@@ -317,7 +315,6 @@ function RowerTabs(props) {
     const handleChange = (event, newValue) => {
         setValue(newValue);
     };
-    {console.log(props.force_profiles)}
 
     /*const handleClick = () => {
         setSuccess(false);
@@ -327,7 +324,6 @@ function RowerTabs(props) {
             setLoading(false);
         }, 3000);
     };*/
-    {console.log(props.workouts)}
 
     return (
         <Box sx={{ flexGrow: 1, p: 3, ml: { sm: `${drawerWidth}px` }, width: { sm: `calc(100% - ${drawerWidth}px)` }, overflow: 'scrollable' }}>
