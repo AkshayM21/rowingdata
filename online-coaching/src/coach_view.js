@@ -16,7 +16,7 @@ import { Base64 } from 'js-base64';
 function Page(props) {
     const user = useContext(UserContext)
     const [redirect, setredirect] = useState(null)
-    const [profiles, setProfiles] = useState([]);
+    const [variance, setVariance] = useState([]);
     const [force_profiles, setForce_profiles]=useState([]);
     const [uni, setUni] = useState("");
     const [name, setName] = useState();
@@ -48,7 +48,9 @@ function Page(props) {
                 fetch(`/graphs?uni=${uni}&workout_id=${response.data[i]["workout_id"]}`).then((response) => response.json())
                 .then(response => {
                     force_profiles[i]=response.force_profile; 
+                    variance[i]=response.stroke_variance;
                     setForce_profiles([...force_profiles]);
+                    setVariance([...variance]);
                     /*console.log(force_profiles[i])}*/
                     //setVariance(response.stroke_variance);
                 })  
@@ -101,7 +103,7 @@ function Page(props) {
                 <RowerMenu onClick={changeName} />
                 <h1>{name} Profile</h1>
                 {console.log(force_profiles)}
-                <RowerTabs results={results} workouts={workouts} force_profiles={force_profiles} uni={uni} name={name} />
+                <RowerTabs results={results} workouts={workouts} force_profiles={force_profiles} variance={variance} uni={uni} name={name} />
             </div>
         )
     }
@@ -117,7 +119,7 @@ function ForceDialog(props) {
             <Typography sx= {{fontWeight: 'bold', mt: '5%'}} align={'center'}>
                 IMSE: {props.imse}
             </Typography>
-            {/*<img src={`data:image/png;base64,${props.variance}`}/>*/}
+            <img src={`data:image/png;base64,${props.variance_plot}`}/>
             
             
             
@@ -153,7 +155,7 @@ function ForceProfile(props) {
                 open={open}
                 onBackdropClick={handleClose}
                 img={props.img}
-                variance={props.variance}
+                variance_plot={props.variance_plot}
                 imse={props.imse}
                 workouts={props.workouts}
                 uni={props.uni}
@@ -216,7 +218,7 @@ function RowerCard(props){
                     <Typography>
                         RPE: {(props.workout['rpe'] !== 0)? props.workout['rpe'] : 'N/A'}
                     </Typography>
-                    <ForceProfile img={props.img} uni={props.uni} imse={props.workout["imse"]} workouts={props.workouts}/>
+                    <ForceProfile img={props.img} variance_plot={props.variance_plot} uni={props.uni} imse={props.workout["imse"]} workouts={props.workouts}/>
                    
                 </CardContent>
             </Card>    
@@ -252,7 +254,7 @@ function RowerCard(props){
                     <Typography>
                         RPE: {(props.workout['rpe'] !== 0)? props.workout['rpe'] : 'N/A'}
                     </Typography>
-                    <ForceProfile img={props.img} uni={props.uni} imse={props.workout["imse"]} workouts={props.workouts}/>
+                    <ForceProfile img={props.img} variance_plot={props.variance_plot} uni={props.uni} imse={props.workout["imse"]} workouts={props.workouts}/>
                 </CardContent>
             </Card>    
         )
@@ -271,7 +273,7 @@ function Workouts(props) {
                     {props.workouts.map((obj, index) => (
                     // Currently set for 2 cards per column in xs, 4 per column for sm
                     <Grid item xs={12} sm={4} md={3} key={index}>
-                        <RowerCard uni={props.uni} workout={obj} workouts={props.workouts} img={props.force_profiles[index]}/>
+                        <RowerCard uni={props.uni} workout={obj} workouts={props.workouts} variance_plot={props.variance[index]} img={props.force_profiles[index]}/>
                         {console.log(props.force_profiles[index])}
                         {console.log(index)}
                     </Grid>))}
@@ -335,7 +337,7 @@ function RowerTabs(props) {
                     </TabList>
                 </Box>
                 <TabPanel value="1">
-                    <Workouts workouts= {props.workouts} uni={props.uni} force_profiles={props.force_profiles}/>
+                    <Workouts workouts= {props.workouts} uni={props.uni} force_profiles={props.force_profiles} variance={props.variance}/>
                 </TabPanel> 
                 <TabPanel value="2">
                     <SorS results= {props.results} uni={props.uni}/>
