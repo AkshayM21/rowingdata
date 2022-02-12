@@ -5,8 +5,9 @@ const drawerWidth = 240;
 function RowerMenu(props)  {
     const[rowers, setRowers]= useState({});
     
+    const idToken = props.idToken
     useEffect(() => {
-        fetch('/rower_list')
+        fetch(`/rower_list?token=${idToken}`)
         .then((response) => response.json())
         .then(response => {
             setRowers(response);      

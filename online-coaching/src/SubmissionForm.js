@@ -26,6 +26,7 @@ class SubmissionForm extends Component{
     constructor(props) {
         super(props);
         
+
         this.state = {
             uni: '', 
             date: null,
@@ -50,7 +51,7 @@ class SubmissionForm extends Component{
         this.handleClose = this.handleClose.bind(this)
         this.handleSubmit = this.handleSubmit.bind(this)
 
-        fetch("/rowers")
+        fetch(`/rowers?token=${this.props.idToken}`)
         .then((result) => result.json())
         .then((result) => {
             this.setState({
@@ -87,6 +88,7 @@ class SubmissionForm extends Component{
             formData.append('workout_type', this.state.workout_type)
             formData.append('rpe', this.state.rpe)
             formData.append('file', this.state.file)
+            formData.append("token", this.props.idToken)
 
             fetch("/submit", {
               method: "POST",
@@ -104,7 +106,7 @@ class SubmissionForm extends Component{
                       isFilePicked: false,
                       validUnis: [],
                       isValidUni: true,
-                      snackBarOpen: true
+                      snackBarOpen: true,
                     })
                     
 
@@ -316,7 +318,7 @@ class SubmissionForm extends Component{
                             </Stack>
                         </Grid>
                         <Grid item sx={{marginBottom: "10px", display:"flex"}}>
-                            <Zones/>
+                            <Zones idToken={this.props.idToken}/>
                             <Button sx={{marginTop: "15px"}} disabled={!submittable} variant="contained" type="submit">Submit</ Button>
                         </Grid>
                     </Grid>

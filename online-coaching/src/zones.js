@@ -6,7 +6,7 @@ import Button from '@mui/material/Button';
 import Settings from './Settings';
 
 function SettingsDialog(props) {
-    const { onBackdropClick, open } = props;
+    const { idToken, onBackdropClick, open } = props;
 
     // Calls onClose- sets open to false
     return(
@@ -17,7 +17,7 @@ function SettingsDialog(props) {
                 <DialogContentText sx={{marginBottom: "10px"}}>
                     Please fill in Functional Threshold Power and Heart Rate Zones from Training Peaks. For heart rate input the end of each zone (for 0 to 120 bpm, please input 120bpm).
                 </DialogContentText>
-                <Settings/>
+                <Settings idToken={idToken}/>
             </DialogContent>
         </Dialog>
     ); 
@@ -28,7 +28,7 @@ SettingsDialog.propTypes = {
     open: PropTypes.bool.isRequired,
 };
 
-export default function Zones() {
+export default function Zones(props) {
 
     const [open, setOpen] = useState(false);
 
@@ -53,6 +53,7 @@ export default function Zones() {
                 Settings
             </Button>
             <SettingsDialog
+                idToken={props.idToken}
                 open={open}
                 onBackdropClick={handleClose}
             />

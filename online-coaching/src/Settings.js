@@ -35,7 +35,7 @@ class Settings extends Component {
         this.handleZone5Change=this.handleZone5Change.bind(this);
         this.handleSubmit = this.handleSubmit.bind(this);
 
-        fetch("/rowers")
+        fetch(`/rowers?token=${this.props.idToken}`)
         .then((result) => result.json())
         .then((result) => {
             this.setState({
@@ -65,6 +65,7 @@ class Settings extends Component {
             formData.append('hr_zone3', this.state.hr_zone3)
             formData.append('hr_zone4', this.state.hr_zone4)
             formData.append('hr_zone5', this.state.hr_zone5)
+            formData.append("token", this.props.idToken)
 
             fetch("/settings", {
               method: "POST",

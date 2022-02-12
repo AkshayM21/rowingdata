@@ -17,8 +17,7 @@ import numpy as np
 import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
-from firebase_admin import credentials, initialize_app, storage
-
+from firebase_admin import credentials, initialize_app, storage, auth
 
 app = Flask(__name__)
 
@@ -31,7 +30,8 @@ firebaseConfig = {
     'storageBucket': "REDACTED_PROJECT_ID.appspot.com",
     'messagingSenderId': "REDACTED_SENDER_ID",
     'appId': "1:REDACTED_SENDER_ID:web:b89950200d0b742a3beea0",
-    'measurementId': "REDACTED_MEASUREMENT_ID"
+    'measurementId': "REDACTED_MEASUREMENT_ID",
+    'clientId': "REDACTED_SENDER_ID-819gjfj83e9ju3pucofspvk2ghnrvour.apps.googleusercontent.com"
   }
 
 with app.app_context():
@@ -66,6 +66,18 @@ def get_csv_from_cloud_with_col(path, index_col):
 def get_png_from_cloud(path):
   return io.BytesIO(storage.bucket(app=firebase).blob(path).download_as_bytes()).getvalue()
   
+def verify(token):
+  try:
+    # Specify the CLIENT_ID of the app that accesses the backend:
+    #idinfo = id_token.verify_oauth2_token(token, transport_requests.Request(), firebaseConfig['clientId'])
+    decoded_token = auth.verify_id_token(token)
+    uid = decoded_token['uid']
+    # ID token is valid. Get the user's Google Account ID from the decoded token.
+    return True
+  except ValueError:
+    # Invalid token
+    return False
+
 
 def isRower(email):
   email_list = rowers_df['Email']
@@ -93,6 +105,10 @@ def index():
 @app.route('/auth', methods=['GET'])
 def is_auth_user():
   email = request.args.get("email")
+  token = request.args.get("token")
+  if(not verify(token)):
+    return "Record not found", 400
+
   admin = isAdmin(email)
   if(admin or isRower(email) or isCoxswain(email) or isTester(email)):
     isStudent = not admin
@@ -107,10 +123,16 @@ def is_auth_user():
 
 @app.route("/workouts", methods=['GET'])
 def workouts():
+  token = request.args.get("token")
+  if(not verify(token)):
+    return "Record not found", 400
   return { "data": get_workouts(request.args.get('uni'))}
 
 @app.route("/graphs", methods=['GET'])
 def graphs():
+  token = request.args.get("token")
+  if(not verify(token)):
+    return "Record not found", 400
   return { 
     "force_profile": str(base64.b64encode(get_png_from_cloud(base_path+request.args.get('uni')+"/"+str(request.args.get('workout_id'))+"/ForceProfile.png")))[2:-1],
     "stroke_variance": str(base64.b64encode(get_png_from_cloud(base_path+request.args.get('uni')+"/"+str(request.args.get('workout_id'))+"/StrokeVariance.png")))[2:-1]
@@ -119,10 +141,16 @@ def graphs():
 
 @app.route("/sors", methods=['GET'])
 def sors():
+  token = request.args.get("token")
+  if(not verify(token)):
+    return "Record not found", 400
   return { "data": get_sors(request.args.get('uni')) }
 
 @app.route('/rowers', methods=['GET'])
 def rowers():
+  token = request.args.get("token")
+  if(not verify(token)):
+    return "Record not found", 400
   email_list = rowers_df['Email']
   unis = [email.split("@")[0] for email in email_list]
   return {
@@ -131,6 +159,9 @@ def rowers():
 
 @app.route('/rower_list', methods=['GET'])
 def rower_list():
+  token = request.args.get("token")
+  if(not verify(token)):
+    return "Record not found", 400
   email_list = rowers_df['Email']
   uni_list = [email.split("@")[0] for email in email_list]
   name_list = rowers_df['Name']
@@ -140,6 +171,9 @@ def rower_list():
 
 @app.route('/settings', methods=['POST']) 
 def settings():
+  token = request.form["token"]
+  if(not verify(token)):
+    return "Record not found", 400
   params={'name' : request.form['name'], 'ftp': int(request.form['ftp']),'hr_zone1':int(request.form['hr_zone1']), 'hr_zone2':int(request.form['hr_zone2']), 'hr_zone3': int(request.form['hr_zone3']), 'hr_zone4':int(request.form['hr_zone4']), 'hr_zone5':int(request.form['hr_zone5'])}
   save_csv_to_cloud(pd.DataFrame(params, index=[0]), base_path+params["name"]+"/settings.csv")
   return "{}"
@@ -151,6 +185,9 @@ def settings():
 #decoupling will be implemented as a boolean for decoupling
 @app.route('/submit', methods=['POST'])
 def submit():
+    token = request.form["token"]
+    if(not verify(token)):
+      return "Record not found", 400
     params = {}
     params['on_time']=int(request.form['on_time'])
     params["workout_type"]=request.form['workout_type']

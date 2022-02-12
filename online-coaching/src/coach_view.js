@@ -24,6 +24,7 @@ function Page() {
     const [results, setResults] = useState([]); 
 
 
+
     useEffect(() => {
         if (!user) {
             setredirect('/')
@@ -40,12 +41,13 @@ function Page() {
 
     useEffect(() => {
 
-        fetch(`/workouts?uni=${uni}`).then((response) => response.json())
+        fetch(`/workouts?uni=${uni}&token=${user ? user.token : null}`).then((response) => response.json())
         .then(response => {
             setWorkouts(response.data); 
             var profiles = [];
             for (let i = 0; i < response.data.length; i++){
-                fetch(`/graphs?uni=${uni}&workout_id=${response.data[i]["workout_id"]}`).then((response) => response.json())
+                // Currently set for 2 cards per column in xs, 4 per column for sm
+                fetch(`/graphs?token=${user ? user.token : null}&uni=${uni}&workout_id=${response.data[i]["workout_id"]}`).then((response) => response.json())
                 .then(response => {
                     force_profiles[i]=response.force_profile; 
                     variance[i]=response.stroke_variance;
@@ -60,7 +62,7 @@ function Page() {
             
         });
 
-        fetch(`/sors?uni=${uni}`).then((response) => response.json())
+        fetch(`/sors?token=${user ? user.token : null}&uni=${uni}`).then((response) => response.json())
         .then(response => {
             setResults(response.data);
         });
@@ -72,15 +74,15 @@ function Page() {
 
     if (uni === "") {
         return(
-            <div className='coach_view'>
-                <RowerMenu onClick={changeName} />
+            <div className="coach_view">
+                <RowerMenu onClick={changeName} idToken={user ? user.token : null} />
                 <h1>Please Select A Rower</h1>
             </div>
         )
     } else {
         return(
             <div className='coach_view'>
-                <RowerMenu onClick={changeName} />
+                <RowerMenu onClick={changeName} idToken={user ? user.token : null} />
                 <h1>{name} Profile</h1>
                 {console.log(force_profiles)}
                 <RowerTabs results={results} workouts={workouts} force_profiles={force_profiles} variance={variance} uni={uni} name={name} />
