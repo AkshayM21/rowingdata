@@ -1,12 +1,8 @@
-from asyncio import current_task
-from random import sample
-from turtle import color
 from flask import Flask
-from flask import render_template
 from flask import request
-import requests
 import base64
 from flask import current_app
+from flask_cors import CORS
 import os
 import io
 import PIL.Image as Image
@@ -20,6 +16,7 @@ import matplotlib.pyplot as plt
 from firebase_admin import credentials, initialize_app, storage, auth
 
 app = Flask(__name__)
+cors = CORS(app)
 
 base_path ="rower_stats/"
 
@@ -480,7 +477,7 @@ def graphs(df, valid_intervals, uni, workout_id):
   curve_datas = []
   ##valid_intervals[-1] = (valid_intervals[-1][0], valid_intervals[-1][1]-20)
   for interval in valid_intervals:
-    for data in df["curve_data"][interval[0]+5:interval[1]]:
+    for data in df["curve_data"][interval[0]+5:interval[1]-5]:
       #handle NaN
       if not pd.isna(data):
         curve_datas.append(list(map(int, data.split(","))))
@@ -546,4 +543,4 @@ def graphs(df, valid_intervals, uni, workout_id):
 
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=True, host="0.0.0.0", port=int(os.environ.get("PORT", 8080)))

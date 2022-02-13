@@ -7,7 +7,7 @@ function RowerMenu(props)  {
     
     const idToken = props.idToken
     useEffect(() => {
-        fetch(`/rower_list?token=${idToken}`)
+        fetch(`https://python-ovgem5mydq-uk.a.run.app/rower_list?token=${idToken}`)
         .then((response) => response.json())
         .then(response => {
             setRowers(response);      

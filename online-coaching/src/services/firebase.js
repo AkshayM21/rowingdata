@@ -37,10 +37,6 @@ export const signInWithGoogle = () => {
     // The signed-in user info.
     const user = res.user;
 
-    
-    console.log("hello")
-    console.log(token)
-
   }).catch((error) => {
     console.log(error.message)
   })

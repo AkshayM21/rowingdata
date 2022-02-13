@@ -35,7 +35,7 @@ class Settings extends Component {
         this.handleZone5Change=this.handleZone5Change.bind(this);
         this.handleSubmit = this.handleSubmit.bind(this);
 
-        fetch(`/rowers?token=${this.props.idToken}`)
+        fetch(`https://python-ovgem5mydq-uk.a.run.app/rowers?token=${this.props.idToken}`)
         .then((result) => result.json())
         .then((result) => {
             this.setState({

@@ -18,7 +18,7 @@ export default (props) => {
 
             user.getIdToken(true).then((idToken)=> {
                 //move to submission page if valid user -- submit get request
-                fetch(`/auth?email=${email}&token=${idToken}`).then((response) => {
+                fetch(`https://python-ovgem5mydq-uk.a.run.app/auth?email=${email}&token=${idToken}`).then((response) => {
                     if(response.ok){
                         return response.json()
                     }

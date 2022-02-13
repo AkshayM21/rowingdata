@@ -2,7 +2,7 @@
   "name": "online-coaching",
   "version": "0.1.0",
   "private": true,
-  "proxy": "http://127.0.0.1:5000/",
+  "proxy": "https://python-ovgem5mydq-uk.a.run.app/",
   "dependencies": {
     "@date-io/moment": "^2.11.0",
     "@emotion/react": "^11.7.1",

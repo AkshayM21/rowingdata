@@ -41,13 +41,13 @@ function Page() {
 
     useEffect(() => {
 
-        fetch(`/workouts?uni=${uni}&token=${user ? user.token : null}`).then((response) => response.json())
+        fetch(`https://python-ovgem5mydq-uk.a.run.app/workouts?uni=${uni}&token=${user ? user.token : null}`).then((response) => response.json())
         .then(response => {
             setWorkouts(response.data); 
             var profiles = [];
             for (let i = 0; i < response.data.length; i++){
                 // Currently set for 2 cards per column in xs, 4 per column for sm
-                fetch(`/graphs?token=${user ? user.token : null}&uni=${uni}&workout_id=${response.data[i]["workout_id"]}`).then((response) => response.json())
+                fetch(`https://python-ovgem5mydq-uk.a.run.app/graphs?token=${user ? user.token : null}&uni=${uni}&workout_id=${response.data[i]["workout_id"]}`).then((response) => response.json())
                 .then(response => {
                     force_profiles[i]=response.force_profile; 
                     variance[i]=response.stroke_variance;
@@ -62,7 +62,7 @@ function Page() {
             
         });
 
-        fetch(`/sors?token=${user ? user.token : null}&uni=${uni}`).then((response) => response.json())
+        fetch(`https://python-ovgem5mydq-uk.a.run.app/sors?token=${user ? user.token : null}&uni=${uni}`).then((response) => response.json())
         .then(response => {
             setResults(response.data);
         });
