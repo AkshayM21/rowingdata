@@ -90,7 +90,7 @@ class SubmissionForm extends Component{
             formData.append('file', this.state.file)
             formData.append("token", this.props.idToken)
 
-            fetch("/submit", {
+            fetch("https://python-ovgem5mydq-uk.a.run.app/submit", {
               method: "POST",
               body: formData,
             })
