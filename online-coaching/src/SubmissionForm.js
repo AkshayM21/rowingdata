@@ -4,6 +4,7 @@ import AdapterMoment from '@mui/lab/AdapterMoment';
 import AdapterDateFns from '@mui/lab/AdapterDateFns';
 import LocalizationProvider from '@mui/lab/LocalizationProvider';
 import DateTimePicker from "@mui/lab/DateTimePicker";
+import DatePicker from "@mui/lab/DatePicker";
 import TimePicker from "@mui/lab/TimePicker";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
@@ -217,7 +218,7 @@ class SubmissionForm extends Component{
                         </Grid>
                         <Grid item>
                             <LocalizationProvider dateAdapter={AdapterDateFns}>
-                                <DateTimePicker
+                                <DatePicker
                                     renderInput={(props) => <TextField {...props} />}
                                     label="Workout Date"
                                     value={this.state.date}
