@@ -52,13 +52,10 @@ function Page() {
                     force_profiles[i]=response.force_profile; 
                     variance[i]=response.stroke_variance;
                     setForce_profiles([...force_profiles]);
-                    setVariance([...variance]);
-                    /*console.log(force_profiles[i])}*/
-                    //setVariance(response.stroke_variance);
+                    setVariance([...variance]); 
                 })  
-                //profiles.length=workouts.length;
             }
-            console.log(force_profiles)
+       
             
         });
 
@@ -84,7 +81,6 @@ function Page() {
             <div className='coach_view'>
                 <RowerMenu onClick={changeName} idToken={user ? user.token : null} />
                 <h1>{name} Profile</h1>
-                {console.log(force_profiles)}
                 <RowerTabs results={results} workouts={workouts} force_profiles={force_profiles} variance={variance} uni={uni} name={name} />
             </div>
         )
