@@ -218,7 +218,7 @@ class SubmissionForm extends Component{
                         </Grid>
                         <Grid item>
                             <LocalizationProvider dateAdapter={AdapterDateFns}>
-                                <DatePicker
+                                <DateTimePicker
                                     renderInput={(props) => <TextField {...props} />}
                                     label="Workout Date"
                                     value={this.state.date}
