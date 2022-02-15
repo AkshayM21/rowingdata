@@ -140,7 +140,7 @@ class SubmissionForm extends Component{
     }
 
     handleDateChange(newValue) {
-        this.setState({date: newValue});
+        this.setState({date: moment(newValue).format("YYYY-MM-DD")});
     }
 
     handleRPEChange(e) {
