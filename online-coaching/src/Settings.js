@@ -67,7 +67,7 @@ class Settings extends Component {
             formData.append('hr_zone5', this.state.hr_zone5)
             formData.append("token", this.props.idToken)
 
-            fetch("/settings", {
+            fetch("https://python-ovgem5mydq-uk.a.run.app/settings", {
               method: "POST",
               body: formData,
             })
