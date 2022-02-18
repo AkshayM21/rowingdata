@@ -85,7 +85,7 @@ class SubmissionForm extends Component{
             formData.append('name', this.state.uni)
             formData.append('date', this.state.date)
             formData.append('description', this.state.description)
-            formData.append('on_time', this.state.time_on)
+            formData.append('on_time', this.state.time_on/1000)
             formData.append('workout_type', this.state.workout_type)
             formData.append('rpe', this.state.rpe)
             formData.append('file', this.state.file)
@@ -141,7 +141,8 @@ class SubmissionForm extends Component{
     }
 
     handleDateChange(newValue) {
-        this.setState({date: moment(newValue).format("YYYY-MM-DD")});
+        var dateString = moment(newValue).format("YYYY-MM-DD h:mm a")
+        this.setState({date: dateString});
     }
 
     handleRPEChange(e) {
@@ -161,8 +162,32 @@ class SubmissionForm extends Component{
 
     handleTimeChange(newValue) {
         if(newValue!=null){
-            let value = newValue.valueOf() - moment().hour(0).minute(0).second(0).millisecond(0).valueOf()
-            this.setState({time_on: value/1000});
+            var d = new Date(newValue)
+            var useMins = d.getSeconds()===0
+            var time_on = this.state.time_on
+            if(useMins){
+                // var minutes = d.getMinutes().toString()
+                // if(minutes.length==1){
+                //     minutes = "0"+minutes
+                // }
+                // var newDate = minutes+":"+(time_on===null ? "00" : time_on.substring(3,5))
+                // console.log(newDate)
+                // this.setState({time_on: newDate})
+                var date = (d.getMinutes()*60*1000+(time_on===null ? 0 : parseInt(time_on.substring(3,5))*1000))
+                this.setState({time_on: date})
+            }else{
+                // var seconds = d.getSeconds().toString()
+                // if(seconds.length==1){
+                //     seconds = "0"+seconds
+                // }
+                // var newDate = this.state.time_on.substring(0,2)+":"+seconds
+                // console.log(newDate)
+                // this.setState({time_on: newDate})
+                var date = (time_on+d.getSeconds()*1000)
+                this.setState({time_on: date})
+            }
+            // let value = newValue.valueOf() - moment().hour(0).minute(0).second(0).millisecond(0).valueOf()
+            // this.setState({time_on: value/1000});
         }
     }
 
@@ -228,13 +253,13 @@ class SubmissionForm extends Component{
                             </LocalizationProvider>
                         </Grid>
                         <Grid item>
-                            <LocalizationProvider dateAdapter={AdapterMoment}>
+                            <LocalizationProvider dateAdapter={AdapterDateFns}>
                                 <TimePicker
                                     renderInput={(props) => <TextField {...props} />}
                                     ampm={false}
-                                    mask="__:__"
                                     openTo="minutes"
                                     views={["minutes", "seconds"]}
+                                    mask="__:__"
                                     inputFormat="mm:ss"
                                     label="Piece Time"
                                     emptyLabel="Piece Time"
