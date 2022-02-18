@@ -163,6 +163,7 @@ class SubmissionForm extends Component{
     handleTimeChange(newValue) {
         if(newValue!=null){
             var d = new Date(newValue)
+            console.log(d)
             var useMins = d.getSeconds()===0
             var time_on = this.state.time_on
             if(useMins){
@@ -173,7 +174,8 @@ class SubmissionForm extends Component{
                 // var newDate = minutes+":"+(time_on===null ? "00" : time_on.substring(3,5))
                 // console.log(newDate)
                 // this.setState({time_on: newDate})
-                var date = (d.getMinutes()*60*1000+(time_on===null ? 0 : parseInt(time_on.substring(3,5))*1000))
+                var date = (d.getMinutes()*60*1000+(time_on===null || isNaN(time_on)? 0 : time_on%60))
+                console.log(date)
                 this.setState({time_on: date})
             }else{
                 // var seconds = d.getSeconds().toString()
@@ -184,6 +186,7 @@ class SubmissionForm extends Component{
                 // console.log(newDate)
                 // this.setState({time_on: newDate})
                 var date = (time_on+d.getSeconds()*1000)
+                console.log(date)
                 this.setState({time_on: date})
             }
             // let value = newValue.valueOf() - moment().hour(0).minute(0).second(0).millisecond(0).valueOf()
