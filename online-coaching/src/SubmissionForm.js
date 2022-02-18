@@ -20,6 +20,7 @@ import Snackbar from '@mui/material/Snackbar';
 import IconButton from '@mui/material/IconButton';
 import CloseIcon from '@mui/icons-material/Close';
 import Zones from './zones';
+import { getSeconds } from "date-fns";
 
 class SubmissionForm extends Component{
 
@@ -174,7 +175,7 @@ class SubmissionForm extends Component{
                 // var newDate = minutes+":"+(time_on===null ? "00" : time_on.substring(3,5))
                 // console.log(newDate)
                 // this.setState({time_on: newDate})
-                var date = (d.getMinutes()*60*1000+(time_on===null || isNaN(time_on)? 0 : time_on%60))
+                var date = (d.getMinutes()*60*1000+(time_on===null || isNaN(time_on)? 0 : (time_on/1000)%60))
                 console.log(date)
                 this.setState({time_on: date})
             }else{
@@ -185,7 +186,11 @@ class SubmissionForm extends Component{
                 // var newDate = this.state.time_on.substring(0,2)+":"+seconds
                 // console.log(newDate)
                 // this.setState({time_on: newDate})
-                var date = (time_on+d.getSeconds()*1000)
+                
+                var date = (Math.floor(time_on/60/1000)*60*1000+d.getSeconds()*1000)
+                if(isNaN(time_on)){
+                    date = d.getMinutes()*60*1000 + d.getSeconds()*1000
+                }
                 console.log(date)
                 this.setState({time_on: date})
             }
