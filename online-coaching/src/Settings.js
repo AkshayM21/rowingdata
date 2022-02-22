@@ -230,7 +230,7 @@ class Settings extends Component {
                             <TextField
                                 id="hr_zone1"
                                 name="hr_zone1"
-                                label="Heart Rate Zone 1"
+                                label="Heart Rate Zone 5"
                                 type="text"
                                 value={this.state.hr_zone1}
                                 onChange={this.handleZone1Change}
@@ -240,7 +240,7 @@ class Settings extends Component {
                             <TextField
                                 id="hr_zone2"
                                 name="hr_zone2"
-                                label="Heart Rate Zone 2"
+                                label="Heart Rate Zone 4"
                                 type="text"
                                 value={this.state.hr_zone2}
                                 onChange={this.handleZone2Change}
@@ -260,7 +260,7 @@ class Settings extends Component {
                             <TextField
                                 id="hr_zone4"
                                 name="hr_zone4"
-                                label="Heart Rate Zone 4"
+                                label="Heart Rate Zone 2"
                                 type="text"
                                 value={this.state.hr_zone4}
                                 onChange={this.handleZone4Change}
@@ -270,7 +270,7 @@ class Settings extends Component {
                             <TextField
                                 id="hr_zone5"
                                 name="hr_zone5"
-                                label="Heart Rate Zone 5"
+                                label="Heart Rate Zone 1"
                                 type="text"
                                 value={this.state.hr_zone5}
                                 onChange={this.handleZone5Change}
