@@ -112,7 +112,7 @@ class Settings extends Component {
     handleFTPChange(e) {
         const newValue = e.target.value;
         if(newValue!=null){
-            if (parseInt(newValue) > 300) {
+            if (parseInt(newValue) > 500) {
                 this.setState({ftp: null});
             }else if(parseInt(newValue)<0){
                 this.setState({ftp: null});
