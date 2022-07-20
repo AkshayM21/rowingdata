@@ -27,7 +27,7 @@ export function Header() {
   const PageName = (
     <div>
       <Typography variant="h6" component="h1" className={logo}>
-        C150 Training Statistics
+        StrokeInsights
       </Typography>
     </div>
   );

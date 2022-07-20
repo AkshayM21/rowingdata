@@ -6,7 +6,7 @@ class Base extends React.Component {
     render () {
         return (
             <Helmet>
-                <title>C150 Training Statistics</title>
+                <title>StrokeInsights</title>
             </Helmet>
         );
     }
