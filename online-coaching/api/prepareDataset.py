@@ -3,7 +3,6 @@ import matplotlib.pyplot as plt
 import numpy as np
 import os
 import pandas as pd
-#from app import *
 import math
 
 
@@ -23,6 +22,7 @@ validation_percentile=0.90
 training = pd.DataFrame()
 validation=pd.DataFrame()
 test=pd.DataFrame()
+unis=[]
 
 #iterate over files in given directory
 for filename in os.listdir(directory):
@@ -31,11 +31,13 @@ for filename in os.listdir(directory):
     if (os.path.isfile(f)):
         uni=f.split("/")[2].split(".")[0]
 
+    unis.append(uni)
+
     #Need to remove first row of each interval
 
     # Removes Unwanted Columns, adds "uni" label
     workout=pd.read_csv(f)
-    workout["label"]=uni
+    workout["label"]=unis.index(uni)
     #workout.drop("stroke_number", axis=1, inplace=True)
     workout.pop('id') 
     workout.pop("workout_interval_id")
@@ -65,9 +67,10 @@ for filename in os.listdir(directory):
     test=pd.concat([test, workout.iloc[validation_endpoint:]])
     test.pop('stroke_number')
 
-    print(workout.head(5))
+    #print(workout.head(5))
 
-print(training.head(5))
+print(unis)
+#print(training.head(5))
 #print(validation.head(5))
 #print(test.head(5))
 
@@ -87,15 +90,32 @@ training_labels=training.pop("label")
 val_labels= validation.pop("label")
 test_labels=test.pop("label")
 
-tf.convert_to_tensor(training)
-tf.convert_to_tensor(validation)
+#Need to create an array of unis that maps directly to an integer, and then add each of those integers to the array
+
+len_training=len(training)
+len_validation=len(validation)
+len_test=len(test)
+
+BATCH_SIZE = 32
+#training = training.repeat().shuffle(len_training).batch(BATCH_SIZE)
+#validation = validation.batch(BATCH_SIZE)
+
+normalized_layer=tf.keras.layers.Normalization(axis=-1)
+normalized_layer.adapt(training)
+normalized_input=normalized_layer(training)
+normalized_validation=normalized_layer(validation)
+
+print(normalized_input)
 
 model=tf.keras.Sequential([
-    tf.keras.layers.Dense(25, activation="relu", input_shape=(11,)),
+    tf.keras.layers.Dense(25, activation="relu", input_shape=(10,)),
+    tf.keras.layers.Dense(25, activation="relu", input_shape=(22,)),
     tf.keras.layers.Dense(29, activation="softmax")
 ])
+
 
 model.compile(optimizer="adam",
     loss=tf.keras.losses.SparseCategoricalCrossentropy(),
     metrics=['accuracy'])
 
+model.fit(normalized_input, training_labels, epochs=20, batch_size=BATCH_SIZE)
