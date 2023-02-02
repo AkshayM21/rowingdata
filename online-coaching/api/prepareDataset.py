@@ -5,12 +5,10 @@ import os
 import pandas as pd
 import math
 
-
-path = "2022-04-13 20s"
+path = "2021-12-02 40'"
 on_time=20
 workout_type="rp3"
 date=path.split()[0]
-description="20s Joules Workout"
 directory = 'rp3_Files/'+path
 
 # This is the percentage of the data used for training (validation % = 1- ratio)
@@ -70,20 +68,12 @@ for filename in os.listdir(directory):
     #print(workout.head(5))
 
 print(unis)
-#print(training.head(5))
-#print(validation.head(5))
-#print(test.head(5))
 
 # Columns in dataset used for processing 
 # ref	stroke_number	power	avg_power	stroke_rate	time	stroke_length	distance	distance_per_stroke	estimated_500m_time	energy_per_stroke	energy_sum	pulse	work_per_pulse	peak_force	peak_force_pos	rel_peak_force_pos	drive_time	recover_time	k	curve_data	stroke_number_in_interval	avg_calculated_power
 
 # To Do: 
-# Parse Data:
-#   DONE: Narrow down which input shape (11 columns including labels)
-#   DONE: Selectively Concatenate all dataframes into full training and validation datasets
-#   Split into labels and data (remove uni column as labels)
-# Design Model: # of and type of (Dense v. Sparse) layers (part 1 DONE)
-# Download Software, Setup, and Test with print statements, Finish Reading Book
+# Add K-fold set building for training and validation (need to work around issue of )
 
 
 training_labels=training.pop("label")
@@ -108,7 +98,9 @@ normalized_validation=normalized_layer(validation)
 print(normalized_input)
 
 model=tf.keras.Sequential([
+    tf.keras.layers.Dropout(0.1, input_shape=(10,)),
     tf.keras.layers.Dense(25, activation="relu", input_shape=(10,)),
+    tf.keras.layers.Dense(25, activation="relu", input_shape=(22,)),
     tf.keras.layers.Dense(25, activation="relu", input_shape=(22,)),
     tf.keras.layers.Dense(29, activation="softmax")
 ])
@@ -118,4 +110,15 @@ model.compile(optimizer="adam",
     loss=tf.keras.losses.SparseCategoricalCrossentropy(),
     metrics=['accuracy'])
 
-model.fit(normalized_input, training_labels, epochs=20, batch_size=BATCH_SIZE)
+early_stopping = tf.keras.callbacks.EarlyStopping(patience=10)
+
+history=model.fit(normalized_input, training_labels, epochs=200, batch_size=BATCH_SIZE)
+
+#TO DO: Graph matplotlib figures showing loss during training
+#       Automatically stop training with a given patience
+#       Examine preliminary results
+plt.plot(history.history['loss'])
+plt.plot(history.history['accuracy'])
+plt.xlabel("Epoch Number")
+plt.ylabel("Loss Magnitude")
+plt.show()
