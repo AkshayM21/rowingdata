@@ -16,7 +16,7 @@ from mimetypes import guess_type as guess_mime_type
 
 # Request all access (permission to read/send/receive emails, manage the inbox, and more)
 SCOPES = ['https://mail.google.com/']
-our_email = 'REDACTED_EMAIL'
+our_email = os.environ.get('NOTIFICATION_EMAIL', 'notifications@example.com')
 
 def gmail_authenticate():
     creds = None

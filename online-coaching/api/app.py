@@ -21,19 +21,20 @@ cors = CORS(app)
 base_path ="rower_stats/"
 
 firebaseConfig = {
-    'apiKey': "REDACTED_API_KEY",
-    'authDomain': "REDACTED_PROJECT_ID.firebaseapp.com",
-    'projectId': "REDACTED_PROJECT_ID",
-    'storageBucket': "REDACTED_PROJECT_ID.appspot.com",
-    'messagingSenderId': "REDACTED_SENDER_ID",
-    'appId': "1:REDACTED_SENDER_ID:web:b89950200d0b742a3beea0",
-    'measurementId': "REDACTED_MEASUREMENT_ID",
-    'clientId': "REDACTED_SENDER_ID-819gjfj83e9ju3pucofspvk2ghnrvour.apps.googleusercontent.com"
+    'apiKey': os.environ.get('FIREBASE_API_KEY'),
+    'authDomain': os.environ.get('FIREBASE_AUTH_DOMAIN'),
+    'projectId': os.environ.get('FIREBASE_PROJECT_ID'),
+    'storageBucket': os.environ.get('FIREBASE_STORAGE_BUCKET'),
+    'messagingSenderId': os.environ.get('FIREBASE_MESSAGING_SENDER_ID'),
+    'appId': os.environ.get('FIREBASE_APP_ID'),
+    'measurementId': os.environ.get('FIREBASE_MEASUREMENT_ID'),
+    'clientId': os.environ.get('FIREBASE_CLIENT_ID')
   }
 
 with app.app_context():
   APP_ROOT = os.path.dirname(os.path.abspath(__file__))
-  cred = credentials.Certificate(json.load(current_app.open_resource("REDACTED_PROJECT_ID-firebase-adminsdk-yccz8-dabed493e7.json")))
+  service_account_path = os.environ.get('FIREBASE_SERVICE_ACCOUNT_PATH', 'firebase-service-account.json')
+  cred = credentials.Certificate(json.load(current_app.open_resource(service_account_path)))
   firebase = initialize_app(cred, options=firebaseConfig)
   rowers_df = pd.read_csv(current_app.open_resource("CSVs/rowers.csv"))
   coxswains_df = pd.read_csv(current_app.open_resource("CSVs/coxswains.csv"))

@@ -1,23 +1,49 @@
 # See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 
-# dependencies
+# Dependencies
 /node_modules
 /.pnp
 .pnp.js
 
-# testing
+# Testing
 /coverage
 
-# production
+# Production
 /build
 
-# misc
-.DS_Store
+# Environment files (NEVER commit these)
+.env
 .env.local
 .env.development.local
 .env.test.local
 .env.production.local
+api/.env
 
+# Firebase/Google credentials (NEVER commit these)
+**/firebase-adminsdk*.json
+**/firebase-service-account.json
+**/credentials.json
+**/token.pickle
+api/online-coaching-*.json
+
+# Python virtual environments
+api/locvenv/
+api/venv/
+api/.venv/
+**/__pycache__/
+*.pyc
+
+# Logs
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
